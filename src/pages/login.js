@@ -74,7 +74,14 @@ form.addEventListener('submit', async (e) => {
 
   } catch (error) {
     // Show error
-    errorMessage.textContent = error.message || 'Login failed. Check your email and password.'
+    let errorText = error.message || 'Login failed. Check your email and password.'
+    
+    // Check if it's an email confirmation error
+    if (error.message?.includes('Email not confirmed') || error.message?.includes('email_not_confirmed')) {
+      errorText = 'Your email address hasn\'t been confirmed yet. Please check your email and click the confirmation link.'
+    }
+    
+    errorMessage.textContent = errorText
     errorAlert.style.display = 'block'
 
     // Reset button

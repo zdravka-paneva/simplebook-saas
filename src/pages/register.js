@@ -112,11 +112,12 @@ form.addEventListener('submit', async (e) => {
 
     // Show success message
     successAlert.style.display = 'block'
+    
+    // Hide form
+    form.style.display = 'none'
 
-    // Redirect after 2 seconds
-    setTimeout(() => {
-      window.location.href = 'login.html'
-    }, 2000)
+    // Don't redirect - user needs to confirm email first
+    console.log('Registration successful. User needs to confirm email.')
 
   } catch (error) {
     // Show error
