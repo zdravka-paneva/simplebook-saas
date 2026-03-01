@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SimpleBook - Smart Appointment Booking for Small Businesses</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="index.html">
+        <span style="color: #0066cc;">Simple</span><span style="color: #f39c12;">Book</span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="#features">Features</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#pricing">Pricing</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="login.html">Login</a>
+          </li>
+          <li class="nav-item">
+            <a class="btn btn-primary text-white ms-2" href="register.html">Sign Up</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero-section py-5" style="background: linear-gradient(135deg, #0066cc 0%, #004299 100%); color: white;">
+    <div class="container py-5">
+      <div class="row align-items-center">
+        <div class="col-lg-6 mb-4 mb-lg-0">
+          <h1 class="display-4 fw-bold mb-4">Book Appointments Effortlessly</h1>
+          <p class="lead mb-4">SimpleBook helps small businesses manage appointments, services, and customers in one beautiful, easy-to-use platform.</p>
+          <div class="d-flex gap-3 flex-wrap">
+            <a href="register.html" class="btn btn-warning btn-lg fw-bold">Get Started Free</a>
+            <a href="#features" class="btn btn-outline-light btn-lg fw-bold">Learn More</a>
+          </div>
+          <p class="mt-4 small">✓ No credit card required • ✓ 14-day free trial • ✓ Setup in 5 minutes</p>
+        </div>
+        <div class="col-lg-6">
+          <div class="card border-0 shadow-lg p-4" style="background: rgba(255,255,255,0.95);">
+            <div class="card-body text-dark">
+              <h5 class="card-title mb-3">Recent Bookings</h5>
+              <div class="booking-preview">
+                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                  <div>
+                    <div class="fw-bold">Hair Styling</div>
+                    <small class="text-muted">Mar 1, 2:00 PM</small>
+                  </div>
+                  <span class="badge bg-success">Confirmed</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                  <div>
+                    <div class="fw-bold">Massage Therapy</div>
+                    <small class="text-muted">Mar 2, 3:30 PM</small>
+                  </div>
+                  <span class="badge bg-success">Confirmed</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center py-2">
+                  <div>
+                    <div class="fw-bold">Nail Care</div>
+                    <small class="text-muted">Mar 3, 11:00 AM</small>
+                  </div>
+                  <span class="badge bg-warning">Pending</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="py-5 bg-light">
+    <div class="container">
+      <div class="text-center mb-5">
+        <h2 class="display-5 fw-bold mb-3">Why Choose SimpleBook?</h2>
+        <p class="lead text-muted">Everything you need to manage your business appointments</p>
+      </div>
+      <div class="row g-4">
+        <!-- Feature 1 -->
+        <div class="col-md-6 col-lg-4">
+          <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center">
+              <div class="mb-3" style="font-size: 3rem;">📅</div>
+              <h5 class="card-title fw-bold">Smart Scheduling</h5>
+              <p class="card-text text-muted">Automated scheduling that respects your availability and reduces no-shows with smart reminders.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="col-md-6 col-lg-4">
+          <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center">
+              <div class="mb-3" style="font-size: 3rem;">👥</div>
+              <h5 class="card-title fw-bold">Client Management</h5>
+              <p class="card-text text-muted">Keep all your client information organized in one place with contact details and booking history.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="col-md-6 col-lg-4">
+          <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center">
+              <div class="mb-3" style="font-size: 3rem;">💰</div>
+              <h5 class="card-title fw-bold">Easy Payments</h5>
+              <p class="card-text text-muted">Integrated payment processing for quick, secure transactions directly from your booking page.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="col-md-6 col-lg-4">
+          <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center">
+              <div class="mb-3" style="font-size: 3rem;">📱</div>
+              <h5 class="card-title fw-bold">Mobile Friendly</h5>
+              <p class="card-text text-muted">Fully responsive design that works beautifully on phones, tablets, and desktops.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feature 5 -->
+        <div class="col-md-6 col-lg-4">
+          <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center">
+              <div class="mb-3" style="font-size: 3rem;">🔐</div>
+              <h5 class="card-title fw-bold">Secure & Private</h5>
+              <p class="card-text text-muted">Enterprise-grade security with encrypted data and full compliance with privacy regulations.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feature 6 -->
+        <div class="col-md-6 col-lg-4">
+          <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center">
+              <div class="mb-3" style="font-size: 3rem;">⚡</div>
+              <h5 class="card-title fw-bold">Real-time Updates</h5>
+              <p class="card-text text-muted">Get instant notifications for new bookings, cancellations, and updates across all devices.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section class="py-5">
+    <div class="container">
+      <div class="text-center mb-5">
+        <h2 class="display-5 fw-bold mb-3">How It Works</h2>
+        <p class="lead text-muted">Simple steps to get started in minutes</p>
+      </div>
+      <div class="row g-4">
+        <div class="col-md-6 col-lg-3">
+          <div class="text-center">
+            <div class="bg-primary text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 1.5rem;">1</div>
+            <h5 class="fw-bold">Sign Up</h5>
+            <p class="text-muted small">Create your free account in less than a minute</p>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="text-center">
+            <div class="bg-primary text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 1.5rem;">2</div>
+            <h5 class="fw-bold">Add Services</h5>
+            <p class="text-muted small">List your services with prices and durations</p>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="text-center">
+            <div class="bg-primary text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 1.5rem;">3</div>
+            <h5 class="fw-bold">Share Link</h5>
+            <p class="text-muted small">Share your booking page with customers</p>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="text-center">
+            <div class="bg-primary text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 1.5rem;">4</div>
+            <h5 class="fw-bold">Get Bookings</h5>
+            <p class="text-muted small">Receive instant notifications for new appointments</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="py-5" style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); color: white;">
+    <div class="container text-center">
+      <h2 class="display-5 fw-bold mb-4">Ready to Grow Your Business?</h2>
+      <p class="lead mb-4">Join thousands of businesses using SimpleBook to manage appointments effortlessly.</p>
+      <a href="register.html" class="btn btn-light btn-lg fw-bold px-5">Start Your Free Trial</a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-dark text-white py-5">
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-md-4">
+          <h5 class="fw-bold mb-3">SimpleBook</h5>
+          <p class="text-muted small">Smart appointment booking for small businesses.</p>
+        </div>
+        <div class="col-md-4">
+          <h5 class="fw-bold mb-3">Quick Links</h5>
+          <ul class="list-unstyled small">
+            <li><a href="#features" class="text-muted text-decoration-none">Features</a></li>
+            <li><a href="login.html" class="text-muted text-decoration-none">Login</a></li>
+            <li><a href="register.html" class="text-muted text-decoration-none">Sign Up</a></li>
+          </ul>
+        </div>
+        <div class="col-md-4">
+          <h5 class="fw-bold mb-3">Legal</h5>
+          <ul class="list-unstyled small">
+            <li><a href="#" class="text-muted text-decoration-none">Privacy Policy</a></li>
+            <li><a href="#" class="text-muted text-decoration-none">Terms of Service</a></li>
+            <li><a href="#" class="text-muted text-decoration-none">Contact Us</a></li>
+          </ul>
+        </div>
+      </div>
+      <hr class="bg-secondary my-4">
+      <div class="text-center">
+        <p class="text-muted small mb-0">&copy; 2026 SimpleBook. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
