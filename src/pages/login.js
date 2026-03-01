@@ -13,8 +13,13 @@ async function checkAuth() {
   try {
     const user = await getCurrentUser()
     if (user) {
-      // User is logged in, redirect to dashboard
-      window.location.href = 'dashboard.html'
+      // Check user type and redirect accordingly
+      const accountType = user.user_metadata?.account_type || 'client'
+      if (accountType === 'business') {
+        window.location.href = 'dashboard.html'
+      } else {
+        window.location.href = 'booking.html'
+      }
     }
   } catch (error) {
     console.log('User not authenticated')
@@ -40,16 +45,31 @@ form.addEventListener('submit', async (e) => {
   try {
     const email = document.getElementById('email').value
     const password = document.getElementById('password').value
+    const accountType = document.querySelector('input[name="accountType"]:checked').value
 
     // Login user
     const result = await loginUser(email, password)
 
+    // Verify account type matches
+    if (result.user.user_metadata?.account_type !== accountType) {
+      errorMessage.textContent = `This account is registered as a ${result.user.user_metadata?.account_type === 'business' ? 'Business Owner' : 'Client'}. Please select the correct account type.`
+      errorAlert.style.display = 'block'
+
+      // Reset button
+      submitBtn.disabled = false
+      submitText.style.display = 'inline'
+      loadingSpinner.style.display = 'none'
+      return
+    }
+
     // Show success message
     successAlert.style.display = 'block'
 
-    // Redirect after 1 second
+    // Redirect based on account type
+    const redirectUrl = accountType === 'business' ? 'dashboard.html' : 'booking.html'
+    
     setTimeout(() => {
-      window.location.href = 'dashboard.html'
+      window.location.href = redirectUrl
     }, 1000)
 
   } catch (error) {
@@ -63,3 +83,4 @@ form.addEventListener('submit', async (e) => {
     loadingSpinner.style.display = 'none'
   }
 })
+

@@ -41,7 +41,26 @@
               <p class="text-center text-muted mb-4">Sign in to your SimpleBook account</p>
 
               <form id="loginForm">
-                <!-- Email -->
+                <!-- Account Type Selection -->
+                <div class="mb-4">
+                  <label class="form-label fw-medium mb-3">Login as:</label>
+                  <div class="row g-2">
+                    <div class="col-6">
+                      <input type="radio" class="btn-check" name="accountType" id="businessLogin" value="business" checked required>
+                      <label class="btn btn-outline-primary w-100 fw-medium" for="businessLogin">
+                        🏢 Business Owner
+                      </label>
+                    </div>
+                    <div class="col-6">
+                      <input type="radio" class="btn-check" name="accountType" id="clientLogin" value="client" required>
+                      <label class="btn btn-outline-primary w-100 fw-medium" for="clientLogin">
+                        👤 Client
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <hr class="my-4">
                 <div class="mb-3">
                   <label for="email" class="form-label fw-medium">Email Address</label>
                   <input type="email" class="form-control form-control-lg" id="email" name="email" placeholder="your@email.com" required>

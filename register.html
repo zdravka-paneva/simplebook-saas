@@ -41,26 +41,63 @@
               <p class="text-center text-muted mb-4">Start managing your appointments today</p>
 
               <form id="registerForm">
-                <!-- Business Name -->
-                <div class="mb-3">
-                  <label for="businessName" class="form-label fw-medium">Business Name</label>
-                  <input type="text" class="form-control form-control-lg" id="businessName" name="businessName" placeholder="e.g., Hair Studio Pro" required>
-                  <small class="form-text text-muted">The name customers will see</small>
+                <!-- Account Type Selection -->
+                <div class="mb-4">
+                  <label class="form-label fw-medium mb-3">I am a:</label>
+                  <div class="row g-2">
+                    <div class="col-6">
+                      <input type="radio" class="btn-check" name="accountType" id="businessOption" value="business" checked required>
+                      <label class="btn btn-outline-primary w-100 fw-medium" for="businessOption">
+                        🏢 Business Owner
+                      </label>
+                    </div>
+                    <div class="col-6">
+                      <input type="radio" class="btn-check" name="accountType" id="clientOption" value="client" required>
+                      <label class="btn btn-outline-primary w-100 fw-medium" for="clientOption">
+                        👤 Client
+                      </label>
+                    </div>
+                  </div>
                 </div>
 
-                <!-- Business Type -->
-                <div class="mb-3">
-                  <label for="businessType" class="form-label fw-medium">Business Type</label>
-                  <select class="form-select form-select-lg" id="businessType" name="businessType" required>
-                    <option value="">Select your business type</option>
-                    <option value="salon">Hair Salon</option>
-                    <option value="spa">Spa & Wellness</option>
-                    <option value="clinic">Medical Clinic</option>
-                    <option value="fitness">Fitness Studio</option>
-                    <option value="consulting">Consulting</option>
-                    <option value="education">Education</option>
-                    <option value="other">Other</option>
-                  </select>
+                <!-- Business Section (shown only for business owners) -->
+                <div id="businessSection">
+                  <!-- Business Name -->
+                  <div class="mb-3">
+                    <label for="businessName" class="form-label fw-medium">Business Name</label>
+                    <input type="text" class="form-control form-control-lg" id="businessName" name="businessName" placeholder="e.g., Hair Studio Pro">
+                    <small class="form-text text-muted">The name customers will see</small>
+                  </div>
+
+                  <!-- Business Type -->
+                  <div class="mb-3">
+                    <label for="businessType" class="form-label fw-medium">Business Type</label>
+                    <select class="form-select form-select-lg" id="businessType" name="businessType">
+                      <option value="">Select your business type</option>
+                      <option value="salon">Hair Salon</option>
+                      <option value="spa">Spa & Wellness</option>
+                      <option value="clinic">Medical Clinic</option>
+                      <option value="fitness">Fitness Studio</option>
+                      <option value="consulting">Consulting</option>
+                      <option value="education">Education</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Client Section (shown only for clients) -->
+                <div id="clientSection" style="display: none;">
+                  <!-- Full Name -->
+                  <div class="mb-3">
+                    <label for="fullName" class="form-label fw-medium">Full Name</label>
+                    <input type="text" class="form-control form-control-lg" id="fullName" name="fullName" placeholder="John Doe">
+                  </div>
+
+                  <!-- Phone -->
+                  <div class="mb-3">
+                    <label for="phone" class="form-label fw-medium">Phone Number</label>
+                    <input type="tel" class="form-control form-control-lg" id="phone" name="phone" placeholder="(555) 123-4567">
+                  </div>
                 </div>
 
                 <!-- Email -->

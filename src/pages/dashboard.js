@@ -26,6 +26,14 @@ async function checkAuth() {
       return
     }
 
+    // Check if user is a business owner
+    const accountType = currentUser.user_metadata?.account_type
+    if (accountType !== 'business') {
+      // This is a client, redirect to booking page
+      window.location.href = 'booking.html'
+      return
+    }
+
     // Display user email
     userEmail.textContent = currentUser.email
     document.getElementById('profileEmail').textContent = currentUser.email
