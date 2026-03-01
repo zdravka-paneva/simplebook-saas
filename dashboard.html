@@ -169,10 +169,26 @@
             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addServiceModal">+ Add Service</button>
           </div>
 
-          <div class="row g-4" id="servicesList">
-            <div class="col-md-6 col-lg-4">
-              <div class="card border-0 shadow-sm text-center py-4">
-                <p class="text-muted">No services yet. Create your first service.</p>
+          <div class="card border-0 shadow-sm">
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Name</th>
+                      <th>Description</th>
+                      <th>Duration</th>
+                      <th>Price</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="servicesTableBody">
+                    <tr>
+                      <td colspan="6" class="text-center text-muted py-4">No services yet. Create your first service.</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
