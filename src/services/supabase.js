@@ -236,3 +236,91 @@ export async function updateAppointmentStatus(appointmentId, status) {
   if (error) throw error
   return data
 }
+
+/**
+ * Upload profile picture to Supabase Storage
+ * @param {string} userId - User ID
+ * @param {File} file - Image file to upload
+ * @returns {Promise<string>} Public URL of uploaded file
+ */
+export async function uploadProfilePicture(userId, file) {
+  // Create unique filename with timestamp
+  const timestamp = Date.now()
+  const fileExt = file.name.split('.').pop()
+  const fileName = `${userId}-${timestamp}.${fileExt}`
+  const filePath = `profile-pictures/${fileName}`
+
+  // Upload file to storage
+  const { error: uploadError } = await supabase.storage
+    .from('user-uploads')
+    .upload(filePath, file, {
+      cacheControl: '3600',
+      upsert: false
+    })
+
+  if (uploadError) throw uploadError
+
+  // Get public URL
+  const { data } = supabase.storage
+    .from('user-uploads')
+    .getPublicUrl(filePath)
+
+  return data.publicUrl
+}
+
+/**
+ * Delete profile picture from storage
+ * @param {string} filePath - File path in storage
+ * @returns {Promise<void>}
+ */
+export async function deleteProfilePicture(filePath) {
+  const { error } = await supabase.storage
+    .from('user-uploads')
+    .remove([filePath])
+
+  if (error) throw error
+}
+
+/**
+ * Upload document to Supabase Storage
+ * @param {string} businessId - Business ID
+ * @param {File} file - Document file to upload
+ * @returns {Promise<string>} Public URL of uploaded file
+ */
+export async function uploadDocument(businessId, file) {
+  // Create unique filename with timestamp
+  const timestamp = Date.now()
+  const fileExt = file.name.split('.').pop()
+  const fileName = `${businessId}-${timestamp}-${file.name}`
+  const filePath = `documents/${businessId}/${fileName}`
+
+  // Upload file to storage
+  const { error: uploadError } = await supabase.storage
+    .from('user-uploads')
+    .upload(filePath, file, {
+      cacheControl: '3600',
+      upsert: false
+    })
+
+  if (uploadError) throw uploadError
+
+  // Get public URL
+  const { data } = supabase.storage
+    .from('user-uploads')
+    .getPublicUrl(filePath)
+
+  return data.publicUrl
+}
+
+/**
+ * Get download URL for a file
+ * @param {string} filePath - File path in storage
+ * @returns {Promise<string>} Download URL
+ */
+export async function getDownloadUrl(filePath) {
+  const { data } = supabase.storage
+    .from('user-uploads')
+    .getPublicUrl(filePath)
+
+  return data.publicUrl
+}

@@ -1,5 +1,5 @@
 import { getCurrentUser, logoutUser, onAuthStateChange } from '../modules/auth.js'
-import { getServices, getAppointmentsWithDetails, getClients, getProfile, createService, updateAppointmentStatus } from '../services/supabase.js'
+import { getServices, getAppointmentsWithDetails, getClients, getProfile, createService, updateAppointmentStatus, uploadProfilePicture, updateProfile } from '../services/supabase.js'
 
 const logoutBtn = document.getElementById('logoutBtn')
 const userEmail = document.getElementById('userEmail')
@@ -43,8 +43,23 @@ async function checkAuth() {
     if (document.getElementById('profileEmail')) {
       document.getElementById('profileEmail').textContent = currentUser.email
     }
+    if (document.getElementById('profileEmailDisplay')) {
+      document.getElementById('profileEmailDisplay').textContent = currentUser.email
+    }
     if (document.getElementById('businessName')) {
       document.getElementById('businessName').textContent = currentProfile?.business_name || 'Not set'
+    }
+
+    // Display profile picture if exists
+    if (currentProfile?.profile_image_url) {
+      const profilePicImg = document.getElementById('profilePicture')
+      const profileInitialsDiv = document.getElementById('profileInitials')
+      if (profilePicImg && profileInitialsDiv) {
+        profilePicImg.src = currentProfile.profile_image_url
+        profilePicImg.style.display = 'block'
+        profileInitialsDiv.style.display = 'none'
+        document.getElementById('removePictureBtn').style.display = 'inline-block'
+      }
     }
 
     // Set member since date
@@ -323,6 +338,82 @@ addAppointmentForm.addEventListener('submit', async (e) => {
 
   // Show success (mock)
   alert('Appointment created successfully!')
+})
+
+// Profile Picture Upload Handlers
+const profilePictureInput = document.getElementById('profilePictureInput')
+const changePictureBtn = document.getElementById('changePictureBtn')
+const uploadPictureBtn = document.getElementById('uploadPictureBtn')
+const removePictureBtn = document.getElementById('removePictureBtn')
+const profilePicture = document.getElementById('profilePicture')
+const profileInitials = document.getElementById('profileInitials')
+
+changePictureBtn.addEventListener('click', () => {
+  profilePictureInput.click()
+})
+
+profilePictureInput.addEventListener('change', (e) => {
+  const file = e.target.files[0]
+  if (!file) return
+
+  // Validate file size (5MB max)
+  if (file.size > 5 * 1024 * 1024) {
+    alert('File size must be less than 5MB')
+    return
+  }
+
+  // Show preview
+  const reader = new FileReader()
+  reader.onload = (event) => {
+    profilePicture.src = event.target.result
+    profilePicture.style.display = 'block'
+    profileInitials.style.display = 'none'
+    uploadPictureBtn.style.display = 'inline-block'
+    removePictureBtn.style.display = 'inline-block'
+  }
+  reader.readAsDataURL(file)
+})
+
+uploadPictureBtn.addEventListener('click', async () => {
+  const file = profilePictureInput.files[0]
+  if (!file) return
+
+  try {
+    uploadPictureBtn.disabled = true
+    uploadPictureBtn.textContent = '⏳ Uploading...'
+
+    // Upload picture
+    const publicUrl = await uploadProfilePicture(currentUser.id, file)
+
+    // Update profile with new image URL
+    await updateProfile(currentUser.id, {
+      profile_image_url: publicUrl
+    })
+
+    // Store in currentProfile
+    currentProfile.profile_image_url = publicUrl
+
+    // Reset inputs
+    profilePictureInput.value = ''
+    uploadPictureBtn.style.display = 'none'
+    uploadPictureBtn.textContent = 'Upload Picture'
+
+    alert('Profile picture updated successfully!')
+  } catch (error) {
+    console.error('Error uploading picture:', error)
+    alert('Failed to upload picture: ' + error.message)
+  } finally {
+    uploadPictureBtn.disabled = false
+  }
+})
+
+removePictureBtn.addEventListener('click', () => {
+  profilePictureInput.value = ''
+  profilePicture.src = ''
+  profilePicture.style.display = 'none'
+  profileInitials.style.display = 'flex'
+  uploadPictureBtn.style.display = 'none'
+  removePictureBtn.style.display = 'none'
 })
 
 // Initialize on page load
