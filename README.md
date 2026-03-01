@@ -291,20 +291,133 @@ All database tables implement RLS policies:
 
 The application is built as a Vite SPA with a Node.js backend (Supabase).
 
-### Deploying to Netlify
+### Production Build
+
+Before deploying, create a production build:
+
 ```bash
 npm run build
-# Drag & drop the 'dist' folder to Netlify
 ```
 
-Or connect your GitHub repo for automatic deployments.
+This generates optimized files in the `dist/` folder:
+- Minified HTML/CSS/JavaScript
+- Optimized bundle size (~16KB gzipped)
+- Source maps for debugging
+
+**Requirements for deployment:**
+1. `.env.local` converted to deployment environment variables
+2. Supabase project URL and API key configured
+3. Supabase Storage bucket "user-uploads" created (see Storage Setup)
+4. RLS policies enabled on all tables
+
+### Storage Setup (Required for File Uploads)
+
+Before deploying, create the Supabase Storage bucket:
+
+1. Go to [Supabase Dashboard](https://app.supabase.com) → Your Project
+2. Navigate to **Storage** → **Buckets**
+3. Click **Create a new bucket**
+4. Enter name: `user-uploads`
+5. Toggle **Public bucket** to ON
+6. Save the bucket
+
+Then set the bucket path:
+```
+Profile pictures: storage/v1/object/public/user-uploads/profile-pictures/
+Documents: storage/v1/object/public/user-uploads/documents/
+```
+
+### Deploying to Netlify
+
+**Option 1: Git-based deployment (Recommended)**
+
+1. Push your code to GitHub
+2. Go to [Netlify](https://app.netlify.com)
+3. Click **Add new site** → **Import an existing project**
+4. Select your GitHub repository
+5. Build command: `npm run build`
+6. Publish directory: `dist`
+7. Set environment variables:
+   - `VITE_SUPABASE_URL`: Your Supabase URL
+   - `VITE_SUPABASE_ANON_KEY`: Your Supabase API key
+8. Click **Deploy**
+
+**Option 2: Manual deployment (Drag & Drop)**
+
+```bash
+npm run build
+```
+
+Then drag the `dist` folder to [Netlify](https://app.netlify.com/drop)
 
 ### Deploying to Vercel
+
+**Option 1: Git-based deployment**
+
+1. Push your code to GitHub
+2. Go to [Vercel](https://vercel.com/new)
+3. Import your GitHub repository
+4. Framework: **Vite**
+5. Build: `npm run build`
+6. Output: `dist`
+7. Add environment variables:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+8. Click **Deploy**
+
+**Option 2: CLI deployment**
+
 ```bash
 npm install -g vercel
-vercel
-# Follow the prompts
+npm run build
+vercel --prod
 ```
+
+### Deploying to Other Platforms
+
+**GitHub Pages:**
+```bash
+npm run build
+# Deploy dist/ to gh-pages branch
+```
+
+**Traditional Hosting (cPanel, etc.):**
+```bash
+npm run build
+# Upload dist/ folder via FTP/SFTP
+```
+
+### Post-Deployment Checklist
+
+- [ ] ✅ Storage bucket "user-uploads" created
+- [ ] ✅ Environment variables configured (Supabase URL, API key)
+- [ ] ✅ App loads without errors in network tab
+- [ ] ✅ Login/Register pages work
+- [ ] ✅ Dashboard loads for business accounts
+- [ ] ✅ Profile picture upload works
+- [ ] ✅ Services and appointments appear
+- [ ] ✅ Booking page loads with correct business ID
+
+### Verify Deployment
+
+After deploying, test:
+
+```bash
+# Test landing page
+curl https://your-deployed-url.com/index.html
+
+# Test auth
+curl https://your-deployed-url.com/login.html
+
+# Test API connectivity (check browser console for errors)
+# Open dashboard and check Network tab in DevTools
+```
+
+If you encounter issues:
+1. Check browser DevTools → **Console** for errors
+2. Check DevTools → **Network** tab for failed API calls
+3. Verify Supabase URL and API key are correct
+4. Ensure RLS policies are configured correctly
 
 ## 📱 Responsive Design
 
