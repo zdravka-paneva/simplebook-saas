@@ -298,48 +298,6 @@ if (addServiceForm) {
 // Initialize on page load
 checkAuth()
 
-  })
-
-  // Reset form
-  addServiceForm.reset()
-
-  // Close modal
-  const modal = bootstrap.Modal.getInstance(document.getElementById('addServiceModal'))
-  modal.hide()
-
-  // Show success (mock)
-  alert('Service added successfully!')
-})
-
-// Add Appointment Form
-const addAppointmentForm = document.getElementById('addAppointmentForm')
-addAppointmentForm.addEventListener('submit', async (e) => {
-  e.preventDefault()
-
-  const clientName = document.getElementById('apptClientName').value
-  const serviceId = document.getElementById('apptService').value
-  const appointmentTime = document.getElementById('apptDate').value
-  const status = document.getElementById('apptStatus').value
-
-  // Mock appointment creation
-  console.log('Adding appointment:', {
-    clientName,
-    serviceId,
-    appointmentTime,
-    status
-  })
-
-  // Reset form
-  addAppointmentForm.reset()
-
-  // Close modal
-  const modal = bootstrap.Modal.getInstance(document.getElementById('addAppointmentModal'))
-  modal.hide()
-
-  // Show success (mock)
-  alert('Appointment created successfully!')
-})
-
 // Profile Picture Upload Handlers
 const profilePictureInput = document.getElementById('profilePictureInput')
 const changePictureBtn = document.getElementById('changePictureBtn')

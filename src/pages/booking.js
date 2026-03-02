@@ -289,8 +289,6 @@ async function initPage() {
 
 initPage()
 
-})
-
 // Generate and populate time slots
 function populateTimeSlots() {
   const slots = generateTimeSlots()
