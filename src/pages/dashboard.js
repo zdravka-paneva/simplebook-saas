@@ -82,6 +82,9 @@ async function checkAuth() {
     // Load dashboard data
     await loadDashboardData()
 
+    // Show booking link in overview
+    updateBookingLinkDisplay()
+
   } catch (error) {
     console.error('📊 DASHBOARD: Auth check failed:', error)
     // Only redirect on auth errors, not general data-loading errors
@@ -282,6 +285,32 @@ logoutBtn.addEventListener('click', async (e) => {
 
 // ─── Business Profile ────────────────────────────────────────────────────────
 
+// Build the public booking URL for this business
+function getBookingUrl() {
+  return `${window.location.origin}/booking.html?business=${currentProfile?.id}`
+}
+
+// Update the visible link in the overview banner
+function updateBookingLinkDisplay() {
+  if (!currentProfile?.id) return
+  const url = getBookingUrl()
+  const display = document.getElementById('bookingLinkDisplay')
+  const openBtn = document.getElementById('openBookingLinkBtn')
+  if (display) display.textContent = url
+  if (openBtn) openBtn.href = url
+}
+
+// Copy button in overview banner
+const copyOverviewBtn = document.getElementById('copyBookingLinkOverviewBtn')
+if (copyOverviewBtn) {
+  copyOverviewBtn.addEventListener('click', () => {
+    navigator.clipboard.writeText(getBookingUrl()).then(() => {
+      copyOverviewBtn.textContent = '✅ Copied!'
+      setTimeout(() => { copyOverviewBtn.textContent = '📋 Copy Link' }, 2500)
+    })
+  })
+}
+
 // Populate the business profile form with current data
 function loadBusinessProfileForm() {
   if (!currentProfile) return
@@ -357,12 +386,11 @@ if (businessProfileForm) {
   })
 }
 
-// Copy booking link
+// Copy booking link (Business Profile section)
 const copyBookingLinkBtn = document.getElementById('copyBookingLinkBtn')
 if (copyBookingLinkBtn) {
   copyBookingLinkBtn.addEventListener('click', () => {
-    const link = `${window.location.origin}/booking.html?business=${currentProfile.id}`
-    navigator.clipboard.writeText(link).then(() => {
+    navigator.clipboard.writeText(getBookingUrl()).then(() => {
       copyBookingLinkBtn.textContent = '✅ Copied!'
       setTimeout(() => { copyBookingLinkBtn.textContent = '🔗 Copy Booking Link' }, 2500)
     })
