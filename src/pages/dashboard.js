@@ -372,6 +372,7 @@ changeBusinessPhotoBtn.addEventListener('click', () => businessPhotoInput.click(
 businessPhotoInput.addEventListener('change', async (e) => {
   const file = e.target.files[0]
   if (!file) return
+  if (!currentUser) { alert('Session expired. Please refresh the page.'); return }
   if (file.size > 5 * 1024 * 1024) {
     alert('File size must be less than 5MB')
     return
@@ -390,14 +391,17 @@ businessPhotoInput.addEventListener('change', async (e) => {
   try {
     changeBusinessPhotoBtn.disabled = true
     changeBusinessPhotoBtn.textContent = '⏳ Uploading...'
+    console.log('📸 Uploading business photo for user:', currentUser.id)
     const publicUrl = await uploadBusinessPhoto(currentUser.id, file)
+    console.log('📸 Photo uploaded, saving URL:', publicUrl)
     await updateProfile(currentUser.id, { business_image_url: publicUrl })
-    currentProfile.business_image_url = publicUrl
+    if (currentProfile) currentProfile.business_image_url = publicUrl
     businessPhotoInput.value = ''
     changeBusinessPhotoBtn.textContent = '✅ Uploaded!'
     setTimeout(() => { changeBusinessPhotoBtn.textContent = '📷 Upload Photo' }, 2500)
   } catch (err) {
-    alert('Failed to upload photo: ' + err.message)
+    console.error('📸 Upload error full:', err)
+    alert('Failed to upload photo: ' + (err?.message || JSON.stringify(err)))
     changeBusinessPhotoBtn.textContent = '📷 Upload Photo'
   } finally {
     changeBusinessPhotoBtn.disabled = false
