@@ -1,4 +1,4 @@
-import { supabase, getProfile } from '../services/supabase.js'
+import { supabase, getProfileById } from '../services/supabase.js'
 
 const bookingForm = document.getElementById('bookingForm')
 const appointmentDateInput = document.getElementById('appointmentDate')
@@ -269,23 +269,46 @@ bookingForm.addEventListener('submit', async (e) => {
 // Initialize page
 async function initPage() {
   const businessId = getBusinessIdFromUrl()
-  
-  if (businessId) {
-    currentBusinessId = businessId
-    localStorage.setItem('bookingBusinessId', businessId)
-    
-    try {
-      const profile = await getProfile(businessId)
-      if (profile) {
-        document.getElementById('businessName').textContent = profile.business_name || 'Our Business'
-        document.getElementById('businessType').textContent = profile.business_type || 'Service'
-        document.getElementById('businessDescription').textContent = profile.business_description || 'Welcome'
-        document.getElementById('businessEmail').textContent = profile.email || 'N/A'
-        document.getElementById('businessPhone').textContent = profile.phone || 'N/A'
+
+  if (!businessId) {
+    // No business ID - show generic placeholder
+    initDateInput()
+    await loadServices()
+    return
+  }
+
+  currentBusinessId = businessId
+  localStorage.setItem('bookingBusinessId', businessId)
+
+  try {
+    const profile = await getProfileById(businessId)
+    if (profile) {
+      // Business name & type
+      document.getElementById('businessName').textContent = profile.business_name || 'Our Business'
+      document.getElementById('businessType').textContent = profile.business_type || ''
+      document.getElementById('businessDescription').textContent =
+        profile.business_description || 'Welcome! Book your appointment below.'
+
+      // Contact info
+      document.getElementById('businessEmail').textContent = profile.email || '—'
+      document.getElementById('businessPhone').textContent = profile.phone || '—'
+      document.getElementById('businessAddress').textContent = profile.address || '—'
+
+      // Business photo
+      if (profile.business_image_url) {
+        const photoContainer = document.getElementById('businessPhotoContainer')
+        if (photoContainer) {
+          photoContainer.innerHTML = `<img src="${profile.business_image_url}" alt="${profile.business_name}" class="rounded-3 mb-3 w-100" style="max-height:200px; object-fit:cover;">`
+        }
       }
-    } catch (error) {
-      console.error('Failed to load business profile:', error)
+
+      // Page title
+      document.title = `Book at ${profile.business_name} - SimpleBook`
+    } else {
+      document.getElementById('businessName').textContent = 'Business not found'
     }
+  } catch (error) {
+    console.error('Failed to load business profile:', error)
   }
 
   initDateInput()

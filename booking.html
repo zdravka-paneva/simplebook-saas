@@ -28,18 +28,19 @@
         <div class="card border-0 shadow-sm sticky-lg-top">
           <div class="card-body p-4">
             <div class="text-center mb-4">
-              <div style="font-size: 4rem; background: linear-gradient(135deg, #0066cc 0%, #f39c12 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-                🏢
+              <!-- Business photo (populated by JS if set) -->
+              <div id="businessPhotoContainer">
+                <div style="font-size: 4rem;">🏢</div>
               </div>
-              <h3 class="fw-bold mt-3" id="businessName">SimpleBook Studio</h3>
-              <p class="text-muted mb-3" id="businessType">Hair Salon</p>
+              <h3 class="fw-bold mt-2" id="businessName">Loading...</h3>
+              <p class="text-muted mb-0" id="businessType"></p>
             </div>
 
             <!-- Business Details -->
             <div class="mb-4 pb-4 border-bottom">
               <h6 class="fw-bold mb-3">About</h6>
               <p class="small text-muted" id="businessDescription">
-                Premium salon offering cutting-edge services with experienced professionals dedicated to making you look and feel your best.
+                Welcome! Book your appointment below.
               </p>
             </div>
 
@@ -66,9 +67,9 @@
             <div>
               <h6 class="fw-bold mb-3">Contact</h6>
               <div class="small">
-                <p class="mb-2"><strong>📧</strong> <span id="businessEmail">contact@simplebook.com</span></p>
-                <p class="mb-2"><strong>📞</strong> <span id="businessPhone">(555) 123-4567</span></p>
-                <p><strong>📍</strong> <span id="businessAddress">123 Main St, City, State 12345</span></p>
+                <p class="mb-2"><strong>📧</strong> <span id="businessEmail">—</span></p>
+                <p class="mb-2"><strong>📞</strong> <span id="businessPhone">—</span></p>
+                <p class="mb-0"><strong>📍</strong> <span id="businessAddress">—</span></p>
               </div>
             </div>
           </div>

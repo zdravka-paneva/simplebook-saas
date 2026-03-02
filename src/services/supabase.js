@@ -120,6 +120,22 @@ export async function getProfile(userId) {
 }
 
 /**
+ * Get profile by its primary key id (used on booking page)
+ * @param {string} profileId - profiles.id (primary key)
+ * @returns {Promise<Object|null>}
+ */
+export async function getProfileById(profileId) {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', profileId)
+    .single()
+
+  if (error && error.code !== 'PGRST116') throw error
+  return data ?? null
+}
+
+/**
  * Update user profile
  * @param {string} userId - Auth user ID
  * @param {Object} updates - Fields to update
