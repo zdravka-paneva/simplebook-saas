@@ -14,6 +14,7 @@ let currentProfile = null
 // Auth state watcher
 onAuthStateChange((session) => {
   if (!session) {
+    console.log('No session detected')
     window.location.href = 'login.html'
   }
 })
@@ -23,20 +24,28 @@ async function checkAuth() {
   try {
     currentUser = await getCurrentUser()
     if (!currentUser) {
+      console.log('No current user')
       window.location.href = 'login.html'
       return
     }
+
+    console.log('Current user:', currentUser.email)
+    console.log('Account type:', currentUser.user_metadata?.account_type)
 
     // Check if user is a business owner
     const accountType = currentUser.user_metadata?.account_type
     if (accountType !== 'business') {
       // This is a client, redirect to booking page
-      window.location.href = 'booking.html'
+      console.log('User is not a business owner, redirecting to booking')
+      setTimeout(() => {
+        window.location.href = 'booking.html'
+      }, 500)
       return
     }
 
     // Get user profile
     currentProfile = await getProfile(currentUser.id)
+    console.log('Profile loaded:', currentProfile?.business_name)
     
     // Display user email and profile info
     userEmail.textContent = currentUser.email
@@ -375,4 +384,6 @@ removePictureBtn.addEventListener('click', () => {
 })
 
 // Initialize on page load
-checkAuth()
+setTimeout(() => {
+  checkAuth()
+}, 100)

@@ -13,7 +13,7 @@ async function checkAuth() {
   try {
     const user = await getCurrentUser()
     if (user) {
-      // Check user type and redirect accordingly
+      // User is already logged in, redirect to appropriate page
       const accountType = user.user_metadata?.account_type || 'client'
       if (accountType === 'business') {
         window.location.href = 'dashboard.html'
@@ -21,13 +21,16 @@ async function checkAuth() {
         window.location.href = 'booking.html'
       }
     }
+    // If not logged in, stay on login page - that's where we should be
   } catch (error) {
-    console.log('User not authenticated')
+    console.log('User not authenticated - showing login form')
   }
 }
 
-// Check auth on page load
-checkAuth()
+// Check auth on page load (but allow 100ms delay for session to load)
+setTimeout(() => {
+  checkAuth()
+}, 100)
 
 // Form submission
 form.addEventListener('submit', async (e) => {
