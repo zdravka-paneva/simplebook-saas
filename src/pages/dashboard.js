@@ -10,69 +10,51 @@ const clientsTab = document.getElementById('clientsTab')
 
 let currentUser = null
 let currentProfile = null
-let authInitialized = false
 
-// Check authentication on page load
+// Check authentication on page load - SIMPLE AND DIRECT
 async function checkAuth() {
   try {
-    console.log('📊 DASHBOARD: checkAuth() starting...')
+    console.log('📊 DASHBOARD: Checking authentication...')
     currentUser = await getCurrentUser()
     
     if (!currentUser) {
-      console.log('📊 DASHBOARD: No current user found!')
-      console.log('📊 DASHBOARD: Redirecting to login.html')
+      console.log('📊 DASHBOARD: No user! Redirecting to login')
       window.location.href = 'login.html'
-      return
+      return false
     }
 
-    console.log('📊 DASHBOARD: Current user:', currentUser.email)
-    console.log('📊 DASHBOARD: User metadata:', currentUser.user_metadata)
-    console.log('📊 DASHBOARD: Account type:', currentUser.user_metadata?.account_type)
-    
-    // Mark auth as initialized - now safe to listen for logout
-    authInitialized = true
-    console.log('📊 DASHBOARD: Auth initialized = true')
-    
-    // Now set up auth state watcher for logout detection (only after init)
-    onAuthStateChange((session) => {
-      console.log('📊 DASHBOARD: onAuthStateChange called, session:', session ? 'exists' : 'missing')
-      if (!session && authInitialized) {
-        console.log('📊 DASHBOARD: Session lost! Redirecting to login')
-        window.location.href = 'login.html'
-      }
-    })
-
-    // Check if user is a business owner
     const accountType = currentUser.user_metadata?.account_type
-    console.log('📊 DASHBOARD: Checking account type:', accountType)
+    console.log('📊 DASHBOARD: User type:', accountType)
     
-    // Show admin link if user is admin
+    // If not business or admin owner, redirect to booking
+    if (accountType !== 'business' && accountType !== 'admin') {
+      console.log('📊 DASHBOARD: User is', accountType, '- redirecting to booking')
+      window.location.href = 'booking.html'
+      return false
+    }
+
+    console.log('📊 DASHBOARD: Auth OK - displaying dashboard')
+    
+    // Show admin link if admin
     const adminLinkItem = document.getElementById('adminLinkItem')
     if (adminLinkItem && accountType === 'admin') {
       adminLinkItem.style.display = 'block'
-      console.log('📊 DASHBOARD: Admin user detected, showing admin link')
-    }
-    
-    if (accountType !== 'business' && accountType !== 'admin') {
-      // This is a client, redirect to booking page
-      console.log('📊 DASHBOARD: User is NOT business/admin, redirecting to booking.html')
-      setTimeout(() => {
-        console.log('📊 DASHBOARD: Executing redirect to booking.html')
-        window.location.href = 'booking.html'
-      }, 500)
-      return
-    }
-    
-    // If admin, allow to view dashboard but skip business-specific setup
-    if (accountType === 'admin') {
-      userEmail.textContent = currentUser.email
-      console.log('📊 DASHBOARD: Admin user logged in')
-      return
+      console.log('📊 DASHBOARD: Admin user - skipping business-specific setup')
+      
+      // Set up logout listener ONCE after successful auth
+      onAuthStateChange((session) => {
+        if (!session) {
+          console.log('📊 DASHBOARD: Session expired - logging out')
+          window.location.href = 'login.html'
+        }
+      })
+      
+      return true
     }
 
-    // Get user profile
+    // Get user profile for business owner
     currentProfile = await getProfile(currentUser.id)
-    console.log('Profile loaded:', currentProfile?.business_name)
+    console.log('📊 DASHBOARD: Profile loaded:', currentProfile?.business_name)
     
     // Display user email and profile info
     userEmail.textContent = currentUser.email
@@ -106,8 +88,19 @@ async function checkAuth() {
 
     // Load dashboard data
     await loadDashboardData()
+    
+    // Set up logout listener ONCE after successful auth
+    onAuthStateChange((session) => {
+      if (!session) {
+        console.log('📊 DASHBOARD: Session expired - logging out')
+        window.location.href = 'login.html'
+      }
+    })
+    
+    return true
+
   } catch (error) {
-    console.error('Auth check failed:', error)
+    console.error('📊 DASHBOARD: Auth check failed:', error)
     window.location.href = 'login.html'
   }
 }
@@ -332,7 +325,9 @@ if (addServiceForm) {
 }
 
 // Initialize on page load
-checkAuth()
+setTimeout(() => {
+  checkAuth()
+}, 100)
 
 // Profile Picture Upload Handlers
 const profilePictureInput = document.getElementById('profilePictureInput')
