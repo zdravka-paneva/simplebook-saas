@@ -130,10 +130,9 @@ export async function updateProfile(userId, updates) {
     .update(updates)
     .eq('user_id', userId)
     .select()
-    .single()
 
   if (error) throw error
-  return data
+  return data?.[0] ?? null
 }
 
 /**
