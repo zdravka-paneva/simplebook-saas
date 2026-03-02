@@ -73,7 +73,10 @@ async function checkAuth() {
 
   } catch (error) {
     console.error('📊 DASHBOARD: Auth check failed:', error)
-    window.location.href = 'login.html'
+    // Only redirect on auth errors, not general data-loading errors
+    if (!currentUser) {
+      window.location.href = 'login.html'
+    }
   }
 }
 

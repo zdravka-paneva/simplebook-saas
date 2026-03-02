@@ -78,10 +78,12 @@ async function checkAuth() {
     await loadBusinesses()
   } catch (error) {
     console.error('Auth check failed:', error)
-    showError('Authentication failed. Please login again.')
-    setTimeout(() => {
-      window.location.href = 'login.html'
-    }, 2000)
+    if (!currentUser) {
+      showError('Authentication failed. Please login again.')
+      setTimeout(() => {
+        window.location.href = 'login.html'
+      }, 2000)
+    }
   }
 }
 

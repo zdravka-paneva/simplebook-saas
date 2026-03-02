@@ -79,12 +79,13 @@ export async function logoutUser() {
 
 /**
  * Get the current authenticated user
+ * Uses getSession() which reads from localStorage - no network request
  * @returns {Promise<Object|null>} User object or null
  */
 export async function getCurrentUser() {
-  const { data, error } = await supabase.auth.getUser()
-  if (error) throw error
-  return data.user
+  const { data: { session }, error } = await supabase.auth.getSession()
+  if (error || !session) return null
+  return session.user
 }
 
 /**
