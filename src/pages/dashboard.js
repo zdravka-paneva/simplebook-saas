@@ -1,4 +1,4 @@
-import { getCurrentUser, logoutUser, onAuthStateChange } from '../modules/auth.js'
+import { getCurrentUser, logoutUser } from '../modules/auth.js'
 import { getServices, getAppointmentsWithDetails, getClients, getProfile, createService, updateAppointmentStatus, uploadProfilePicture, updateProfile } from '../services/supabase.js'
 
 const logoutBtn = document.getElementById('logoutBtn')
@@ -10,67 +10,29 @@ const clientsTab = document.getElementById('clientsTab')
 
 let currentUser = null
 let currentProfile = null
-let logoutListenerSetUp = false
 
-// Set up logout listener ONLY ONCE globally (not per checkAuth)
-function setupLogoutListener() {
-  if (logoutListenerSetUp) {
-    console.log('📊 DASHBOARD: Logout listener already set up')
-    return
-  }
-  
-  logoutListenerSetUp = true
-  console.log('📊 DASHBOARD: Setting up logout listener')
-  
-  let firstCallIgnored = false
-  onAuthStateChange((session) => {
-    // Ignore the first call (it's just checking current session)
-    if (!firstCallIgnored) {
-      firstCallIgnored = true
-      console.log('📊 DASHBOARD: First onAuthStateChange call (ignoring)')
-      return
-    }
-    
-    // From second call onwards, listen for actual logout
-    if (!session) {
-      console.log('📊 DASHBOARD: User logged out - redirecting to login')
-      window.location.href = 'login.html'
-    }
-  })
-}
-
-// Check authentication on page load - SIMPLE AND DIRECT
+// SIMPLE: Just check auth and load data - NO LISTENERS
 async function checkAuth() {
   try {
-    console.log('📊 DASHBOARD: Checking authentication...')
+    console.log('📊 DASHBOARD: Checking auth...')
     currentUser = await getCurrentUser()
     
     if (!currentUser) {
-      console.log('📊 DASHBOARD: No user! Redirecting to login')
+      console.log('📊 DASHBOARD: No user, redirecting to login')
       window.location.href = 'login.html'
-      return false
+      return
     }
 
     const accountType = currentUser.user_metadata?.account_type
     console.log('📊 DASHBOARD: User type:', accountType)
     
-    // If not business or admin owner, redirect to booking
     if (accountType !== 'business' && accountType !== 'admin') {
-      console.log('📊 DASHBOARD: User is', accountType, '- redirecting to booking')
+      console.log('📊 DASHBOARD: Not business owner, redirecting to booking')
       window.location.href = 'booking.html'
-      return false
+      return
     }
 
-    console.log('📊 DASHBOARD: Auth OK - displaying dashboard')
-    
-    // Show admin link if admin
-    const adminLinkItem = document.getElementById('adminLinkItem')
-    if (adminLinkItem && accountType === 'admin') {
-      adminLinkItem.style.display = 'block'
-      console.log('📊 DASHBOARD: Admin user - skipping business-specific setup')
-      setupLogoutListener()
-      return true
-    }
+    console.log('📊 DASHBOARD: Auth OK!')
 
     // Get user profile for business owner
     currentProfile = await getProfile(currentUser.id)
@@ -108,11 +70,6 @@ async function checkAuth() {
 
     // Load dashboard data
     await loadDashboardData()
-    
-    // Set up logout listener after successful auth
-    setupLogoutListener()
-    
-    return true
 
   } catch (error) {
     console.error('📊 DASHBOARD: Auth check failed:', error)
@@ -340,10 +297,7 @@ if (addServiceForm) {
 }
 
 // Initialize on page load
-setTimeout(() => {
-  checkAuth()
-}, 100)
-
+checkAuth()
 // Profile Picture Upload Handlers
 const profilePictureInput = document.getElementById('profilePictureInput')
 const changePictureBtn = document.getElementById('changePictureBtn')

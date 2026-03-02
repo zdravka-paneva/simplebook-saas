@@ -123,7 +123,7 @@ function initDateInput() {
   appointmentDateInput.value = today
 }
 
-// Populate time slots
+// Handle date change
 appointmentDateInput.addEventListener('change', (e) => {
   const selectedDate = new Date(e.target.value)
   const dayOfWeek = selectedDate.getDay()
@@ -139,157 +139,7 @@ appointmentDateInput.addEventListener('change', (e) => {
   populateTimeSlots()
 })
 
-// Generate and populate time slots
-function populateTimeSlots() {
-  const slots = generateTimeSlots()
-  appointmentTimeSelect.innerHTML = '<option value="">Select a time</option>'
-
-  slots.forEach(slot => {
-    const option = document.createElement('option')
-    option.value = slot
-    option.textContent = slot
-    appointmentTimeSelect.appendChild(option)
-  })
-}
-
-// Update summary
-appointmentTimeSelect.addEventListener('change', (e) => {
-  if (e.target.value && appointmentDateInput.value) {
-    const dateObj = new Date(appointmentDateInput.value)
-    const dateStr = dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
-    document.getElementById('summaryDateTime').textContent = `${dateStr} at ${e.target.value}`
-  }
-})
-
-// Form submission
-bookingForm.addEventListener('submit', async (e) => {
-  e.preventDefault()
-
-  errorAlert.style.display = 'none'
-  successMessage.style.display = 'none'
-
-  if (!selectedServiceId) {
-    errorMessage.textContent = 'Please select a service'
-    errorAlert.style.display = 'block'
-    return
-  }
-
-  if (!appointmentDateInput.value) {
-    errorMessage.textContent = 'Please select a date'
-    errorAlert.style.display = 'block'
-    return
-  }
-
-  if (!appointmentTimeSelect.value) {
-    errorMessage.textContent = 'Please select a time'
-    errorAlert.style.display = 'block'
-    return
-  }
-
-  try {
-    const submitBtn = bookingForm.querySelector('button[type="submit"]')
-    const submitText = document.getElementById('submitText')
-    const loadingSpinner = document.getElementById('loadingSpinner')
-
-    submitBtn.disabled = true
-    submitText.style.display = 'none'
-    loadingSpinner.style.display = 'inline-block'
-
-    const clientName = document.getElementById('clientName').value
-    const clientEmail = document.getElementById('clientEmail').value
-    const clientPhone = document.getElementById('clientPhone').value
-    const clientNotes = document.getElementById('clientNotes').value
-
-    if (!clientName || !clientEmail || !clientPhone) {
-      throw new Error('Please fill in all required fields')
-    }
-
-    const businessId = currentBusinessId || getBusinessIdFromUrl()
-    
-    const { data: clientData, error: clientError } = await supabase
-      .from('clients')
-      .insert([{
-        business_id: businessId,
-        email: clientEmail,
-        full_name: clientName,
-        phone: clientPhone,
-        notes: clientNotes
-      }])
-      .select()
-      .single()
-
-    if (clientError) throw clientError
-
-    const timeMatch = appointmentTimeSelect.value.match(/(\d+):(\d+)\s(AM|PM)/)
-    if (!timeMatch) throw new Error('Invalid time format')
-
-    const [, hoursStr, minutesStr, period] = timeMatch
-    let hour24 = parseInt(hoursStr)
-    if (period === 'PM' && hour24 !== 12) hour24 += 12
-    if (period === 'AM' && hour24 === 12) hour24 = 0
-
-    const appointmentDateTime = new Date(appointmentDateInput.value)
-    appointmentDateTime.setHours(hour24, parseInt(minutesStr), 0)
-
-    const { data: appointmentData, error: appointmentError } = await supabase
-      .from('appointments')
-      .insert([{
-        business_id: businessId,
-        service_id: selectedServiceId,
-        client_id: clientData.id,
-        scheduled_at: appointmentDateTime.toISOString(),
-        status: 'pending'
-      }])
-      .select()
-
-    if (appointmentError) throw appointmentError
-
-    bookingForm.style.display = 'none'
-    successMessage.style.display = 'block'
-    window.scrollTo(0, 0)
-  } catch (error) {
-    console.error('Booking failed:', error)
-    errorMessage.textContent = error.message || 'Failed to create appointment'
-    errorAlert.style.display = 'block'
-
-    const submitBtn = bookingForm.querySelector('button[type="submit"]')
-    const submitText = document.getElementById('submitText')
-    const loadingSpinner = document.getElementById('loadingSpinner')
-    submitBtn.disabled = false
-    submitText.style.display = 'inline'
-    loadingSpinner.style.display = 'none'
-  }
-})
-
-// Initialize page
-async function initPage() {
-  const businessId = getBusinessIdFromUrl()
-  
-  if (businessId) {
-    currentBusinessId = businessId
-    localStorage.setItem('bookingBusinessId', businessId)
-    
-    try {
-      const profile = await getProfile(businessId)
-      if (profile) {
-        document.getElementById('businessName').textContent = profile.business_name || 'Our Business'
-        document.getElementById('businessType').textContent = profile.business_type || 'Service'
-        document.getElementById('businessDescription').textContent = profile.business_description || 'Welcome'
-        document.getElementById('businessEmail').textContent = profile.email || 'N/A'
-        document.getElementById('businessPhone').textContent = profile.phone || 'N/A'
-      }
-    } catch (error) {
-      console.error('Failed to load business profile:', error)
-    }
-  }
-
-  initDateInput()
-  await loadServices()
-}
-
-initPage()
-
-// Generate and populate time slots
+// Populate time slots
 function populateTimeSlots() {
   const slots = generateTimeSlots()
   appointmentTimeSelect.innerHTML = '<option value="">Select a time</option>'
@@ -352,6 +202,10 @@ bookingForm.addEventListener('submit', async (e) => {
     const clientPhone = document.getElementById('clientPhone').value
     const clientNotes = document.getElementById('clientNotes').value
 
+    if (!clientName || !clientEmail || !clientPhone) {
+      throw new Error('Please fill in all required fields')
+    }
+
     // Create client record
     const businessId = getBusinessIdFromUrl() || currentBusinessId
     const { data: clientData, error: clientError } = await supabase
@@ -369,13 +223,16 @@ bookingForm.addEventListener('submit', async (e) => {
     if (clientError) throw clientError
 
     // Combine date and time
-    const [hours, minutes, period] = appointmentTimeSelect.value.match(/(\d+):(\d+)\s(AM|PM)/).slice(1)
-    let hour24 = parseInt(hours)
+    const timeMatch = appointmentTimeSelect.value.match(/(\d+):(\d+)\s(AM|PM)/)
+    if (!timeMatch) throw new Error('Invalid time format')
+
+    const [, hoursStr, minutesStr, period] = timeMatch
+    let hour24 = parseInt(hoursStr)
     if (period === 'PM' && hour24 !== 12) hour24 += 12
     if (period === 'AM' && hour24 === 12) hour24 = 0
 
     const appointmentDateTime = new Date(appointmentDateInput.value)
-    appointmentDateTime.setHours(hour24, parseInt(minutes), 0)
+    appointmentDateTime.setHours(hour24, parseInt(minutesStr), 0)
 
     // Create appointment
     const { data: appointmentData, error: appointmentError } = await supabase
@@ -394,6 +251,7 @@ bookingForm.addEventListener('submit', async (e) => {
     // Show success
     bookingForm.style.display = 'none'
     successMessage.style.display = 'block'
+    window.scrollTo(0, 0)
   } catch (error) {
     console.error('Booking failed:', error)
     errorMessage.textContent = error.message || 'Failed to create appointment'
@@ -434,4 +292,5 @@ async function initPage() {
   await loadServices()
 }
 
+// Initialize
 initPage()
