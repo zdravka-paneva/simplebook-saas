@@ -9,6 +9,8 @@ const submitText = document.getElementById('submitText')
 const loadingSpinner = document.getElementById('loadingSpinner')
 const passwordInput = document.getElementById('password')
 const confirmPasswordInput = document.getElementById('confirmPassword')
+const passwordFeedback = document.getElementById('passwordFeedback')
+const emailInput = document.getElementById('email')
 
 // Account type radio buttons
 const businessOption = document.getElementById('businessOption')
@@ -27,16 +29,71 @@ clientOption.addEventListener('change', () => {
   clientSection.style.display = 'block'
 })
 
-// Password validation
+// Real-time password validation
+function validatePasswordMatch() {
+  const password = passwordInput.value
+  const confirmPassword = confirmPasswordInput.value
+
+  if (!confirmPassword) {
+    if (passwordFeedback) {
+      passwordFeedback.style.display = 'none'
+    }
+    return
+  }
+
+  if (password === confirmPassword && password.length > 0) {
+    if (passwordFeedback) {
+      passwordFeedback.innerHTML = '<small class="text-success">✓ Паролите съвпадат</small>'
+      passwordFeedback.style.display = 'block'
+    }
+    errorAlert.style.display = 'none'
+  } else if (password !== confirmPassword) {
+    if (passwordFeedback) {
+      passwordFeedback.innerHTML = '<small class="text-danger">✗ Паролите не съвпадат</small>'
+      passwordFeedback.style.display = 'block'
+    }
+  }
+}
+
+// Real-time validation on password input
+passwordInput.addEventListener('input', validatePasswordMatch)
+confirmPasswordInput.addEventListener('input', validatePasswordMatch)
+
+// Email validation
+function validateEmail(email) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return emailRegex.test(email)
+}
+
+// Password strength validation
 function validatePassword() {
-  if (passwordInput.value !== confirmPasswordInput.value) {
-    errorMessage.textContent = 'Passwords do not match'
+  const email = emailInput.value.trim()
+  const password = passwordInput.value
+  const confirmPassword = confirmPasswordInput.value
+
+  // Validate email
+  if (!email) {
+    errorMessage.textContent = '⚠️ Моля, въведи имейл'
     errorAlert.style.display = 'block'
     return false
   }
 
-  if (passwordInput.value.length < 8) {
-    errorMessage.textContent = 'Password must be at least 8 characters long'
+  if (!validateEmail(email)) {
+    errorMessage.textContent = '⚠️ Невалиден имейл. Пример: име@example.com'
+    errorAlert.style.display = 'block'
+    return false
+  }
+
+  // Validate password length
+  if (password.length < 8) {
+    errorMessage.textContent = '⚠️ Паролата трябва да е поне 8 символа'
+    errorAlert.style.display = 'block'
+    return false
+  }
+
+  // Validate password match
+  if (password !== confirmPassword) {
+    errorMessage.textContent = '⚠️ Паролите не съвпадат'
     errorAlert.style.display = 'block'
     return false
   }
@@ -64,17 +121,26 @@ form.addEventListener('submit', async (e) => {
 
   try {
     const accountType = document.querySelector('input[name="accountType"]:checked').value
-    const email = document.getElementById('email').value
+    const email = emailInput.value.trim()
     const password = passwordInput.value
 
     let metadata = { account_type: accountType }
 
     if (accountType === 'business') {
-      const businessName = document.getElementById('businessName').value
+      const businessName = document.getElementById('businessName').value.trim()
       const businessType = document.getElementById('businessType').value
 
-      if (!businessName || !businessType) {
-        errorMessage.textContent = 'Please fill in all business fields'
+      if (!businessName) {
+        errorMessage.textContent = '⚠️ Моля, въведи име на бизнеса'
+        errorAlert.style.display = 'block'
+        submitBtn.disabled = false
+        submitText.style.display = 'inline'
+        loadingSpinner.style.display = 'none'
+        return
+      }
+
+      if (!businessType) {
+        errorMessage.textContent = '⚠️ Моля, избери тип бизнес'
         errorAlert.style.display = 'block'
         submitBtn.disabled = false
         submitText.style.display = 'inline'
@@ -88,11 +154,11 @@ form.addEventListener('submit', async (e) => {
         business_type: businessType
       }
     } else {
-      const fullName = document.getElementById('fullName').value
-      const phone = document.getElementById('phone').value
+      const fullName = document.getElementById('fullName').value.trim()
+      const phone = document.getElementById('phone').value.trim()
 
       if (!fullName) {
-        errorMessage.textContent = 'Please enter your full name'
+        errorMessage.textContent = '⚠️ Моля, въведи своето име'
         errorAlert.style.display = 'block'
         submitBtn.disabled = false
         submitText.style.display = 'inline'
@@ -103,39 +169,45 @@ form.addEventListener('submit', async (e) => {
       metadata = {
         ...metadata,
         full_name: fullName,
-        phone: phone
+        phone: phone || ''
       }
     }
 
     // Register user
     const result = await registerUser(email, password, metadata)
 
+    // Hide form
+    form.style.display = 'none'
+
     // Show success message
     successAlert.style.display = 'block'
     
-    // Auto-redirect to login after 2 seconds
+    // Auto-redirect to login after 3 seconds
     setTimeout(() => {
       window.location.href = 'login.html'
-    }, 2000)
+    }, 3000)
 
-    console.log('Registration successful. Redirecting to login...')
+    console.log('Регистрацията успешна. Редирект към login...')
 
   } catch (error) {
-    // Show error
-    errorMessage.textContent = error.message || 'Registration failed. Please try again.'
+    // Show specific error messages
+    let errorText = error.message || 'Регистрацията не успя. Моля, опитай отново.'
+    
+    if (error.message.includes('already registered')) {
+      errorText = '⚠️ Този имейл вече е регистриран'
+    } else if (error.message.includes('Invalid email')) {
+      errorText = '⚠️ Невалиден имейл адрес'
+    } else if (error.message.includes('password')) {
+      errorText = '⚠️ Паролата не отговаря на изискванията'
+    }
+
+    errorMessage.textContent = errorText
     errorAlert.style.display = 'block'
 
     // Reset button
     submitBtn.disabled = false
     submitText.style.display = 'inline'
     loadingSpinner.style.display = 'none'
-  }
-})
-
-// Password match validation on input
-confirmPasswordInput.addEventListener('input', () => {
-  if (errorAlert.style.display === 'block') {
-    validatePassword()
   }
 })
 
