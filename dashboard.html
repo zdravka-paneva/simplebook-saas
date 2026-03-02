@@ -45,6 +45,7 @@
           <a href="#" class="list-group-item list-group-item-action" id="appointmentsTab">📅 Appointments</a>
           <a href="#" class="list-group-item list-group-item-action" id="servicesTab">🛠️ Services</a>
           <a href="#" class="list-group-item list-group-item-action" id="clientsTab">👥 Clients</a>
+          <a href="#" class="list-group-item list-group-item-action" id="businessProfileTab">🏢 Business Profile</a>
         </div>
       </div>
 
@@ -267,6 +268,107 @@
       </div>
     </div>
   </div>
+
+        <!-- Business Profile Section -->
+        <div id="businessProfileSection" class="content-section" style="display: none;">
+          <h2 class="fw-bold mb-4">🏢 Business Profile</h2>
+
+          <div class="row g-4">
+            <!-- Business Photo Card -->
+            <div class="col-md-4">
+              <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                  <h6 class="fw-bold mb-3">Business Photo</h6>
+                  <div id="businessPhotoContainer" class="mb-3">
+                    <img id="businessPhotoPreview" src="" alt="Business" class="rounded" style="width: 100%; max-height: 200px; object-fit: cover; display: none;">
+                    <div id="businessPhotoPlaceholder" class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 200px; font-size: 4rem;">🏪</div>
+                  </div>
+                  <input type="file" id="businessPhotoInput" class="d-none" accept="image/*">
+                  <button type="button" class="btn btn-outline-primary btn-sm w-100 mb-2" id="changeBusinessPhotoBtn">📷 Upload Photo</button>
+                  <button type="button" class="btn btn-outline-danger btn-sm w-100" id="removeBusinessPhotoBtn" style="display: none;">🗑️ Remove Photo</button>
+                  <small class="text-muted d-block mt-2">Max 5MB · JPG, PNG, WebP</small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Business Details Card -->
+            <div class="col-md-8">
+              <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                  <h6 class="fw-bold mb-3">Business Information</h6>
+                  <form id="businessProfileForm">
+                    <div class="mb-3">
+                      <label for="bpBusinessName" class="form-label fw-medium">Business Name <span class="text-danger">*</span></label>
+                      <input type="text" class="form-control" id="bpBusinessName" placeholder="e.g. Maria's Hair Studio" required>
+                    </div>
+
+                    <div class="mb-3">
+                      <label for="bpBusinessType" class="form-label fw-medium">Business Type <span class="text-danger">*</span></label>
+                      <select class="form-select" id="bpBusinessType" required>
+                        <option value="">-- Select a type --</option>
+                        <optgroup label="Beauty & Wellness">
+                          <option value="Hairdresser">💇 Hairdresser / Hair Salon</option>
+                          <option value="Manicurist">💅 Manicurist / Nail Studio</option>
+                          <option value="Masseur">💆 Masseur / Massage Studio</option>
+                          <option value="Beautician">✨ Beautician / Beauty Salon</option>
+                          <option value="Barber">💈 Barber Shop</option>
+                          <option value="Spa">🧖 Spa & Wellness Center</option>
+                          <option value="Tattoo">🖊️ Tattoo & Piercing Studio</option>
+                          <option value="Eyebrow">👁️ Eyebrow & Lash Studio</option>
+                        </optgroup>
+                        <optgroup label="Health & Fitness">
+                          <option value="Personal Trainer">🏋️ Personal Trainer</option>
+                          <option value="Yoga">🧘 Yoga / Pilates Studio</option>
+                          <option value="Physiotherapist">🩺 Physiotherapist</option>
+                          <option value="Nutritionist">🥗 Nutritionist</option>
+                          <option value="Psychologist">🧠 Psychologist / Therapist</option>
+                        </optgroup>
+                        <optgroup label="Professional Services">
+                          <option value="Photographer">📸 Photographer</option>
+                          <option value="Tutor">📚 Tutor / Teacher</option>
+                          <option value="Consultant">💼 Consultant</option>
+                          <option value="Lawyer">⚖️ Lawyer</option>
+                          <option value="Accountant">📊 Accountant</option>
+                        </optgroup>
+                        <option value="Other">🔧 Other</option>
+                      </select>
+                    </div>
+
+                    <div class="mb-3">
+                      <label for="bpAddress" class="form-label fw-medium">Business Address</label>
+                      <input type="text" class="form-control" id="bpAddress" placeholder="e.g. 123 Main Street, Sofia, Bulgaria">
+                    </div>
+
+                    <div class="mb-3">
+                      <label for="bpPhone" class="form-label fw-medium">Phone Number</label>
+                      <input type="tel" class="form-control" id="bpPhone" placeholder="e.g. +359 88 123 4567">
+                    </div>
+
+                    <div class="mb-3">
+                      <label for="bpDescription" class="form-label fw-medium">About Your Business</label>
+                      <textarea class="form-control" id="bpDescription" rows="3" placeholder="Describe your services, experience, working hours..."></textarea>
+                    </div>
+
+                    <div id="bpSuccessAlert" class="alert alert-success d-none" role="alert">
+                      ✅ Profile saved successfully!
+                    </div>
+                    <div id="bpErrorAlert" class="alert alert-danger d-none" role="alert">
+                      ❌ <span id="bpErrorMessage">Failed to save profile</span>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                      <button type="submit" class="btn btn-primary" id="saveProfileBtn">
+                        <span id="saveProfileText">💾 Save Changes</span>
+                        <span id="saveProfileSpinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+                      </button>
+                      <button type="button" class="btn btn-outline-secondary" id="copyBookingLinkBtn">🔗 Copy Booking Link</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
   <!-- Add Appointment Modal -->
   <div class="modal fade" id="addAppointmentModal" tabindex="-1" aria-labelledby="addAppointmentModalLabel" aria-hidden="true">

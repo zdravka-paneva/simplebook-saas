@@ -282,6 +282,28 @@ export async function deleteProfilePicture(filePath) {
 }
 
 /**
+ * Upload business photo to Supabase Storage
+ * @param {string} userId - User ID
+ * @param {File} file - Image file to upload
+ * @returns {Promise<string>} Public URL of uploaded file
+ */
+export async function uploadBusinessPhoto(userId, file) {
+  const timestamp = Date.now()
+  const fileExt = file.name.split('.').pop()
+  const fileName = `${userId}-business-${timestamp}.${fileExt}`
+  const filePath = `business-photos/${fileName}`
+
+  const { error: uploadError } = await supabase.storage
+    .from('user-uploads')
+    .upload(filePath, file, { cacheControl: '3600', upsert: false })
+
+  if (uploadError) throw uploadError
+
+  const { data } = supabase.storage.from('user-uploads').getPublicUrl(filePath)
+  return data.publicUrl
+}
+
+/**
  * Upload document to Supabase Storage
  * @param {string} businessId - Business ID
  * @param {File} file - Document file to upload

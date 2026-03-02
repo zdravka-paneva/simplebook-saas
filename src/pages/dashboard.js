@@ -1,5 +1,5 @@
 import { getCurrentUser, logoutUser } from '../modules/auth.js'
-import { getServices, getAppointmentsWithDetails, getClients, getProfile, createService, updateAppointmentStatus, uploadProfilePicture, updateProfile } from '../services/supabase.js'
+import { getServices, getAppointmentsWithDetails, getClients, getProfile, createService, updateAppointmentStatus, uploadProfilePicture, updateProfile, uploadBusinessPhoto } from '../services/supabase.js'
 
 const logoutBtn = document.getElementById('logoutBtn')
 const userEmail = document.getElementById('userEmail')
@@ -7,6 +7,7 @@ const overviewTab = document.getElementById('overviewTab')
 const appointmentsTab = document.getElementById('appointmentsTab')
 const servicesTab = document.getElementById('servicesTab')
 const clientsTab = document.getElementById('clientsTab')
+const businessProfileTab = document.getElementById('businessProfileTab')
 
 let currentUser = null
 let currentProfile = null
@@ -251,6 +252,13 @@ clientsTab.addEventListener('click', (e) => {
   clientsTab.classList.add('active')
 })
 
+businessProfileTab.addEventListener('click', (e) => {
+  e.preventDefault()
+  showSection('businessProfileSection')
+  businessProfileTab.classList.add('active')
+  loadBusinessProfileForm()
+})
+
 // Logout
 logoutBtn.addEventListener('click', async (e) => {
   e.preventDefault()
@@ -259,6 +267,150 @@ logoutBtn.addEventListener('click', async (e) => {
     window.location.href = 'index.html'
   } catch (error) {
     console.error('Logout failed:', error)
+  }
+})
+
+// ─── Business Profile ────────────────────────────────────────────────────────
+
+// Populate the business profile form with current data
+function loadBusinessProfileForm() {
+  if (!currentProfile) return
+  document.getElementById('bpBusinessName').value = currentProfile.business_name || ''
+  document.getElementById('bpBusinessType').value = currentProfile.business_type || ''
+  document.getElementById('bpAddress').value = currentProfile.address || ''
+  document.getElementById('bpPhone').value = currentProfile.phone || ''
+  document.getElementById('bpDescription').value = currentProfile.business_description || ''
+
+  // Show business photo if exists
+  const preview = document.getElementById('businessPhotoPreview')
+  const placeholder = document.getElementById('businessPhotoPlaceholder')
+  const removeBtn = document.getElementById('removeBusinessPhotoBtn')
+  if (currentProfile.business_image_url) {
+    preview.src = currentProfile.business_image_url
+    preview.style.display = 'block'
+    placeholder.style.display = 'none'
+    removeBtn.style.display = 'block'
+  }
+}
+
+// Save business profile form
+const businessProfileForm = document.getElementById('businessProfileForm')
+if (businessProfileForm) {
+  businessProfileForm.addEventListener('submit', async (e) => {
+    e.preventDefault()
+    const saveBtn = document.getElementById('saveProfileBtn')
+    const saveText = document.getElementById('saveProfileText')
+    const saveSpinner = document.getElementById('saveProfileSpinner')
+    const successAlert = document.getElementById('bpSuccessAlert')
+    const errorAlert = document.getElementById('bpErrorAlert')
+    const errorMsg = document.getElementById('bpErrorMessage')
+
+    saveBtn.disabled = true
+    saveText.classList.add('d-none')
+    saveSpinner.classList.remove('d-none')
+    successAlert.classList.add('d-none')
+    errorAlert.classList.add('d-none')
+
+    try {
+      const updates = {
+        business_name: document.getElementById('bpBusinessName').value.trim(),
+        business_type: document.getElementById('bpBusinessType').value,
+        address: document.getElementById('bpAddress').value.trim(),
+        phone: document.getElementById('bpPhone').value.trim(),
+        business_description: document.getElementById('bpDescription').value.trim()
+      }
+
+      if (!updates.business_name || !updates.business_type) {
+        throw new Error('Business name and type are required.')
+      }
+
+      await updateProfile(currentUser.id, updates)
+      Object.assign(currentProfile, updates)
+
+      // Update navbar display
+      document.getElementById('businessName').textContent = updates.business_name
+
+      successAlert.classList.remove('d-none')
+      setTimeout(() => successAlert.classList.add('d-none'), 4000)
+    } catch (error) {
+      errorMsg.textContent = error.message
+      errorAlert.classList.remove('d-none')
+    } finally {
+      saveBtn.disabled = false
+      saveText.classList.remove('d-none')
+      saveSpinner.classList.add('d-none')
+    }
+  })
+}
+
+// Copy booking link
+const copyBookingLinkBtn = document.getElementById('copyBookingLinkBtn')
+if (copyBookingLinkBtn) {
+  copyBookingLinkBtn.addEventListener('click', () => {
+    const link = `${window.location.origin}/booking.html?business=${currentProfile.id}`
+    navigator.clipboard.writeText(link).then(() => {
+      copyBookingLinkBtn.textContent = '✅ Copied!'
+      setTimeout(() => { copyBookingLinkBtn.textContent = '🔗 Copy Booking Link' }, 2500)
+    })
+  })
+}
+
+// ─── Business Photo Upload ────────────────────────────────────────────────────
+
+const businessPhotoInput = document.getElementById('businessPhotoInput')
+const changeBusinessPhotoBtn = document.getElementById('changeBusinessPhotoBtn')
+const removeBusinessPhotoBtn = document.getElementById('removeBusinessPhotoBtn')
+const businessPhotoPreview = document.getElementById('businessPhotoPreview')
+const businessPhotoPlaceholder = document.getElementById('businessPhotoPlaceholder')
+
+changeBusinessPhotoBtn.addEventListener('click', () => businessPhotoInput.click())
+
+businessPhotoInput.addEventListener('change', async (e) => {
+  const file = e.target.files[0]
+  if (!file) return
+  if (file.size > 5 * 1024 * 1024) {
+    alert('File size must be less than 5MB')
+    return
+  }
+
+  // Show preview immediately
+  const reader = new FileReader()
+  reader.onload = (ev) => {
+    businessPhotoPreview.src = ev.target.result
+    businessPhotoPreview.style.display = 'block'
+    businessPhotoPlaceholder.style.display = 'none'
+    removeBusinessPhotoBtn.style.display = 'block'
+  }
+  reader.readAsDataURL(file)
+
+  try {
+    changeBusinessPhotoBtn.disabled = true
+    changeBusinessPhotoBtn.textContent = '⏳ Uploading...'
+    const publicUrl = await uploadBusinessPhoto(currentUser.id, file)
+    await updateProfile(currentUser.id, { business_image_url: publicUrl })
+    currentProfile.business_image_url = publicUrl
+    businessPhotoInput.value = ''
+    changeBusinessPhotoBtn.textContent = '✅ Uploaded!'
+    setTimeout(() => { changeBusinessPhotoBtn.textContent = '📷 Upload Photo' }, 2500)
+  } catch (err) {
+    alert('Failed to upload photo: ' + err.message)
+    changeBusinessPhotoBtn.textContent = '📷 Upload Photo'
+  } finally {
+    changeBusinessPhotoBtn.disabled = false
+  }
+})
+
+removeBusinessPhotoBtn.addEventListener('click', async () => {
+  businessPhotoPreview.src = ''
+  businessPhotoPreview.style.display = 'none'
+  businessPhotoPlaceholder.style.display = 'flex'
+  removeBusinessPhotoBtn.style.display = 'none'
+  businessPhotoInput.value = ''
+  try {
+    await updateProfile(currentUser.id, { business_image_url: null })
+    currentProfile.business_image_url = null
+  } catch (err) {
+    console.error('Failed to remove business photo:', err)
   }
 })
 
@@ -301,6 +453,9 @@ if (addServiceForm) {
 
 // Initialize on page load
 checkAuth()
+
+// ─── Profile Picture Upload ───────────────────────────────────────────────────
+
 // Profile Picture Upload Handlers
 const profilePictureInput = document.getElementById('profilePictureInput')
 const changePictureBtn = document.getElementById('changePictureBtn')
@@ -377,5 +532,3 @@ removePictureBtn.addEventListener('click', () => {
   removePictureBtn.style.display = 'none'
 })
 
-// Initialize on page load
-checkAuth()
