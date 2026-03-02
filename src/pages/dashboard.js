@@ -38,12 +38,26 @@ async function checkAuth() {
 
     // Check if user is a business owner
     const accountType = currentUser.user_metadata?.account_type
-    if (accountType !== 'business') {
+    
+    // Show admin link if user is admin
+    const adminLinkItem = document.getElementById('adminLinkItem')
+    if (adminLinkItem && accountType === 'admin') {
+      adminLinkItem.style.display = 'block'
+    }
+    
+    if (accountType !== 'business' && accountType !== 'admin') {
       // This is a client, redirect to booking page
       console.log('User is not a business owner, redirecting to booking')
       setTimeout(() => {
         window.location.href = 'booking.html'
       }, 500)
+      return
+    }
+    
+    // If admin, allow to view dashboard but skip business-specific setup
+    if (accountType === 'admin') {
+      userEmail.textContent = currentUser.email
+      console.log('Admin user logged in')
       return
     }
 

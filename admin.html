@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - SimpleBook</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="src/style.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container-lg">
+            <a class="navbar-brand fw-bold" href="index.html">
+                <i class="bi bi-calendar-check"></i> SimpleBook Admin
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle"></i> <span id="userEmail">User</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#" id="logoutBtn">Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-lg mt-4">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-lg-3">
+                <div class="list-group sticky-top" style="top: 80px;">
+                    <button type="button" class="list-group-item list-group-item-action active" aria-current="true" data-tab="businesses">
+                        <i class="bi bi-shop"></i> All Businesses
+                    </button>
+                    <button type="button" class="list-group-item list-group-item-action" data-tab="appointments">
+                        <i class="bi bi-calendar-event"></i> All Appointments
+                    </button>
+                    <button type="button" class="list-group-item list-group-item-action" data-tab="users">
+                        <i class="bi bi-people"></i> All Users
+                    </button>
+                    <button type="button" class="list-group-item list-group-item-action" data-tab="settings">
+                        <i class="bi bi-gear"></i> Settings
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Tab Content -->
+            <div class="col-lg-9">
+                <!-- Businesses Tab -->
+                <div id="businesses" class="tab-content active">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>Manage Businesses</h2>
+                        <input type="text" class="form-control" style="width: 250px;" id="businessSearch" placeholder="Search by name or email...">
+                    </div>
+
+                    <div id="businessesList" class="row">
+                        <!-- Businesses will be loaded here -->
+                        <div class="text-center text-muted mt-5">
+                            <div class="spinner-border" role="status"></div>
+                            <p>Loading businesses...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Appointments Tab -->
+                <div id="appointments" class="tab-content">
+                    <h2 class="mb-4">All Appointments</h2>
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="appointmentsTable">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Business</th>
+                                    <th>Client</th>
+                                    <th>Service</th>
+                                    <th>Date/Time</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="text-center text-muted">
+                                    <td colspan="6">
+                                        <div class="spinner-border spinner-border-sm" role="status"></div>
+                                        Loading...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Users Tab -->
+                <div id="users" class="tab-content">
+                    <h2 class="mb-4">All Users</h2>
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="usersTable">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Email</th>
+                                    <th>Type</th>
+                                    <th>Created</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="text-center text-muted">
+                                    <td colspan="5">
+                                        <div class="spinner-border spinner-border-sm" role="status"></div>
+                                        Loading...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Settings Tab -->
+                <div id="settings" class="tab-content">
+                    <h2 class="mb-4">Admin Settings</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">System Information</h5>
+                            <p><strong>Admin User:</strong> <span id="adminEmail">-</span></p>
+                            <p><strong>Total Businesses:</strong> <span id="totalBusinesses">-</span></p>
+                            <p><strong>Total Users:</strong> <span id="totalUsers">-</span></p>
+                            <p><strong>Total Appointments:</strong> <span id="totalAppointments">-</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Alert -->
+    <div id="errorAlert" class="alert alert-danger alert-dismissible fade position-fixed top-0 start-50 translate-middle-x mt-3" role="alert" style="display: none; z-index: 1050;">
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <strong>Error!</strong> <span id="errorMessage"></span>
+    </div>
+
+    <!-- Success Alert -->
+    <div id="successAlert" class="alert alert-success alert-dismissible fade position-fixed top-0 start-50 translate-middle-x mt-3" role="alert" style="display: none; z-index: 1050;">
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <span id="successMessage"></span>
+    </div>
+
+    <script type="module" src="src/pages/admin.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
