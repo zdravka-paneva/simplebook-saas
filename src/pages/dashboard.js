@@ -375,6 +375,4 @@ removePictureBtn.addEventListener('click', () => {
 })
 
 // Initialize on page load
-setTimeout(() => {
-  checkAuth()
-}, 100)
+checkAuth()
