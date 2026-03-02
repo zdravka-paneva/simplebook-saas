@@ -11,19 +11,27 @@ const loadingSpinner = document.getElementById('loadingSpinner')
 // Check if user is already logged in
 async function checkAuth() {
   try {
+    console.log('🔐 LOGIN: checkAuth() starting...')
     const user = await getCurrentUser()
+    console.log('🔐 LOGIN: getCurrentUser() returned:', user?.email)
+    
     if (user) {
-      // User is already logged in, redirect to appropriate page
+      console.log('🔐 LOGIN: User found! User metadata:', user.user_metadata)
       const accountType = user.user_metadata?.account_type || 'client'
+      console.log('🔐 LOGIN: Account type:', accountType)
+      console.log('🔐 LOGIN: Redirecting to', accountType === 'business' ? 'dashboard.html' : 'booking.html')
+      
       if (accountType === 'business') {
         window.location.href = 'dashboard.html'
       } else {
         window.location.href = 'booking.html'
       }
+    } else {
+      console.log('🔐 LOGIN: No user logged in - staying on login page')
     }
     // If not logged in, stay on login page - that's where we should be
   } catch (error) {
-    console.log('User not authenticated - showing login form')
+    console.error('🔐 LOGIN: checkAuth() error:', error)
   }
 }
 

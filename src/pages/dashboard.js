@@ -15,40 +15,49 @@ let authInitialized = false
 // Check authentication on page load
 async function checkAuth() {
   try {
+    console.log('📊 DASHBOARD: checkAuth() starting...')
     currentUser = await getCurrentUser()
+    
     if (!currentUser) {
-      console.log('No current user')
+      console.log('📊 DASHBOARD: No current user found!')
+      console.log('📊 DASHBOARD: Redirecting to login.html')
       window.location.href = 'login.html'
       return
     }
 
-    console.log('Current user:', currentUser.email)
-    console.log('Account type:', currentUser.user_metadata?.account_type)
+    console.log('📊 DASHBOARD: Current user:', currentUser.email)
+    console.log('📊 DASHBOARD: User metadata:', currentUser.user_metadata)
+    console.log('📊 DASHBOARD: Account type:', currentUser.user_metadata?.account_type)
     
     // Mark auth as initialized - now safe to listen for logout
     authInitialized = true
+    console.log('📊 DASHBOARD: Auth initialized = true')
     
     // Now set up auth state watcher for logout detection (only after init)
     onAuthStateChange((session) => {
+      console.log('📊 DASHBOARD: onAuthStateChange called, session:', session ? 'exists' : 'missing')
       if (!session && authInitialized) {
-        console.log('Session lost, redirecting to login')
+        console.log('📊 DASHBOARD: Session lost! Redirecting to login')
         window.location.href = 'login.html'
       }
     })
 
     // Check if user is a business owner
     const accountType = currentUser.user_metadata?.account_type
+    console.log('📊 DASHBOARD: Checking account type:', accountType)
     
     // Show admin link if user is admin
     const adminLinkItem = document.getElementById('adminLinkItem')
     if (adminLinkItem && accountType === 'admin') {
       adminLinkItem.style.display = 'block'
+      console.log('📊 DASHBOARD: Admin user detected, showing admin link')
     }
     
     if (accountType !== 'business' && accountType !== 'admin') {
       // This is a client, redirect to booking page
-      console.log('User is not a business owner, redirecting to booking')
+      console.log('📊 DASHBOARD: User is NOT business/admin, redirecting to booking.html')
       setTimeout(() => {
+        console.log('📊 DASHBOARD: Executing redirect to booking.html')
         window.location.href = 'booking.html'
       }, 500)
       return
@@ -57,7 +66,7 @@ async function checkAuth() {
     // If admin, allow to view dashboard but skip business-specific setup
     if (accountType === 'admin') {
       userEmail.textContent = currentUser.email
-      console.log('Admin user logged in')
+      console.log('📊 DASHBOARD: Admin user logged in')
       return
     }
 
