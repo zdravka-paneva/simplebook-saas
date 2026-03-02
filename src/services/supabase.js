@@ -126,10 +126,10 @@ export async function getProfile(userId) {
  * @returns {Promise<Object>} Updated profile
  */
 export async function updateProfile(userId, updates) {
-  // Use upsert so it works even if the profile row doesn't exist yet
   const { data, error } = await supabase
     .from('profiles')
-    .upsert({ user_id: userId, ...updates }, { onConflict: 'user_id' })
+    .update(updates)
+    .eq('user_id', userId)
     .select()
 
   if (error) throw error

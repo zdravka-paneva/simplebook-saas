@@ -1,5 +1,5 @@
 import { getCurrentUser, logoutUser } from '../modules/auth.js'
-import { getServices, getAppointmentsWithDetails, getClients, getProfile, createService, updateAppointmentStatus, uploadProfilePicture, updateProfile, uploadBusinessPhoto } from '../services/supabase.js'
+import { getServices, getAppointmentsWithDetails, getClients, getProfile, getOrCreateProfile, createService, updateAppointmentStatus, uploadProfilePicture, updateProfile, uploadBusinessPhoto } from '../services/supabase.js'
 
 const logoutBtn = document.getElementById('logoutBtn')
 const userEmail = document.getElementById('userEmail')
@@ -35,8 +35,18 @@ async function checkAuth() {
 
     console.log('📊 DASHBOARD: Auth OK!')
 
-    // Get user profile for business owner
+    // Get user profile, create it if missing
     currentProfile = await getProfile(currentUser.id)
+    if (!currentProfile) {
+      console.log('📊 DASHBOARD: No profile found, creating one...')
+      currentProfile = await getOrCreateProfile(currentUser.id, {
+        email: currentUser.email,
+        account_type: currentUser.user_metadata?.account_type || 'business',
+        business_name: currentUser.user_metadata?.business_name || '',
+        business_type: currentUser.user_metadata?.business_type || '',
+        full_name: currentUser.user_metadata?.full_name || ''
+      })
+    }
     console.log('📊 DASHBOARD: Profile loaded:', currentProfile?.business_name)
     
     // Display user email and profile info
