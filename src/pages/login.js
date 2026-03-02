@@ -8,41 +8,10 @@ const submitBtn = form.querySelector('button[type="submit"]')
 const submitText = document.getElementById('submitText')
 const loadingSpinner = document.getElementById('loadingSpinner')
 
-// Check if user is already logged in
-async function checkAuth() {
-  try {
-    console.log('🔐 LOGIN: checkAuth() starting...')
-    const user = await getCurrentUser()
-    console.log('🔐 LOGIN: getCurrentUser() returned:', user?.email)
-    
-    if (user) {
-      console.log('🔐 LOGIN: User found! User metadata:', user.user_metadata)
-      const accountType = user.user_metadata?.account_type || 'client'
-      console.log('🔐 LOGIN: Account type:', accountType)
-      console.log('🔐 LOGIN: Redirecting to', accountType === 'business' ? 'dashboard.html' : 'booking.html')
-      
-      if (accountType === 'business') {
-        window.location.href = 'dashboard.html'
-      } else {
-        window.location.href = 'booking.html'
-      }
-    } else {
-      console.log('🔐 LOGIN: No user logged in - staying on login page')
-    }
-    // If not logged in, stay on login page - that's where we should be
-  } catch (error) {
-    console.error('🔐 LOGIN: checkAuth() error:', error)
-  }
-}
-
-// Check auth on page load (but allow 100ms delay for session to load)
-setTimeout(() => {
-  checkAuth()
-}, 100)
-
 // Form submission
 form.addEventListener('submit', async (e) => {
   e.preventDefault()
+  console.log('🔐 LOGIN: Form submitted!')
 
   // Hide alerts
   errorAlert.style.display = 'none'
@@ -57,12 +26,16 @@ form.addEventListener('submit', async (e) => {
     const email = document.getElementById('email').value
     const password = document.getElementById('password').value
     const accountType = document.querySelector('input[name="accountType"]:checked').value
+    console.log('🔐 LOGIN: Attempting login with email:', email, 'accountType:', accountType)
 
     // Login user
     const result = await loginUser(email, password)
+    console.log('🔐 LOGIN: Login successful! User:', result.user.email)
+    console.log('🔐 LOGIN: User metadata:', result.user.user_metadata)
 
     // Verify account type matches
     if (result.user.user_metadata?.account_type !== accountType) {
+      console.log('🔐 LOGIN: Account type mismatch! Expected:', accountType, 'Got:', result.user.user_metadata?.account_type)
       errorMessage.textContent = `This account is registered as a ${result.user.user_metadata?.account_type === 'business' ? 'Business Owner' : 'Client'}. Please select the correct account type.`
       errorAlert.style.display = 'block'
 
@@ -74,18 +47,20 @@ form.addEventListener('submit', async (e) => {
     }
 
     // Show success message
+    console.log('🔐 LOGIN: Account type match! Showing success and redirecting...')
     successAlert.style.display = 'block'
 
     // Redirect based on account type
     const redirectUrl = accountType === 'business' ? 'dashboard.html' : 'booking.html'
+    console.log('🔐 LOGIN: Redirecting to:', redirectUrl)
     
     setTimeout(() => {
+      console.log('🔐 LOGIN: EXECUTING REDIRECT NOW to:', redirectUrl)
       window.location.href = redirectUrl
     }, 1000)
 
   } catch (error) {
-    // Show error
-    let errorText = error.message || 'Login failed. Check your email and password.'
+    console.error('🔐 LOGIN: Login error:', error)
     
     // Check if it's an email confirmation error
     if (error.message?.includes('Email not confirmed') || error.message?.includes('email_not_confirmed')) {
