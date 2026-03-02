@@ -10,14 +10,7 @@ const clientsTab = document.getElementById('clientsTab')
 
 let currentUser = null
 let currentProfile = null
-
-// Auth state watcher
-onAuthStateChange((session) => {
-  if (!session) {
-    console.log('No session detected')
-    window.location.href = 'login.html'
-  }
-})
+let authInitialized = false
 
 // Check authentication on page load
 async function checkAuth() {
@@ -31,6 +24,17 @@ async function checkAuth() {
 
     console.log('Current user:', currentUser.email)
     console.log('Account type:', currentUser.user_metadata?.account_type)
+    
+    // Mark auth as initialized - now safe to listen for logout
+    authInitialized = true
+    
+    // Now set up auth state watcher for logout detection (only after init)
+    onAuthStateChange((session) => {
+      if (!session && authInitialized) {
+        console.log('Session lost, redirecting to login')
+        window.location.href = 'login.html'
+      }
+    })
 
     // Check if user is a business owner
     const accountType = currentUser.user_metadata?.account_type
