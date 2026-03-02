@@ -114,8 +114,9 @@ export async function getProfile(userId) {
     .eq('user_id', userId)
     .single()
 
-  if (error) throw error
-  return data
+  // PGRST116 = 0 rows found - not an error, just no profile yet
+  if (error && error.code !== 'PGRST116') throw error
+  return data ?? null
 }
 
 /**
@@ -125,10 +126,10 @@ export async function getProfile(userId) {
  * @returns {Promise<Object>} Updated profile
  */
 export async function updateProfile(userId, updates) {
+  // Use upsert so it works even if the profile row doesn't exist yet
   const { data, error } = await supabase
     .from('profiles')
-    .update(updates)
-    .eq('user_id', userId)
+    .upsert({ user_id: userId, ...updates }, { onConflict: 'user_id' })
     .select()
 
   if (error) throw error

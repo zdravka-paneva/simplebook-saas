@@ -325,7 +325,11 @@ if (businessProfileForm) {
       }
 
       await updateProfile(currentUser.id, updates)
-      Object.assign(currentProfile, updates)
+      if (currentProfile) {
+        Object.assign(currentProfile, updates)
+      } else {
+        currentProfile = { ...updates }
+      }
 
       // Update navbar display
       document.getElementById('businessName').textContent = updates.business_name
