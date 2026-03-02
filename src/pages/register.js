@@ -174,7 +174,9 @@ form.addEventListener('submit', async (e) => {
     }
 
     // Register user
+    console.log('Стартиране на регистрация с:', { email, accountType: metadata.account_type })
     const result = await registerUser(email, password, metadata)
+    console.log('Регистрация успешна:', result)
 
     // Hide form
     form.style.display = 'none'
@@ -184,23 +186,33 @@ form.addEventListener('submit', async (e) => {
     
     // Auto-redirect to login after 3 seconds
     setTimeout(() => {
+      console.log('Редирект към login.html')
       window.location.href = 'login.html'
     }, 3000)
 
     console.log('Регистрацията успешна. Редирект към login...')
 
   } catch (error) {
+    // Log full error details
+    console.error('РЕГИСТРАЦИЯ ГРЕШКА:', error)
+    console.error('Error message:', error.message)
+    console.error('Error code:', error.status)
+    console.error('Full error:', error)
+    
     // Show specific error messages
     let errorText = error.message || 'Регистрацията не успя. Моля, опитай отново.'
     
-    if (error.message.includes('already registered')) {
+    if (error.message && error.message.includes('already registered')) {
       errorText = '⚠️ Този имейл вече е регистриран'
-    } else if (error.message.includes('Invalid email')) {
+    } else if (error.message && error.message.includes('Invalid email')) {
       errorText = '⚠️ Невалиден имейл адрес'
-    } else if (error.message.includes('password')) {
+    } else if (error.message && error.message.includes('password')) {
       errorText = '⚠️ Паролата не отговаря на изискванията'
+    } else if (error.message && error.message.includes('User already exists')) {
+      errorText = '⚠️ Този имейл вече е регистриран в системата'
     }
 
+    console.error('Показване на грешка:', errorText)
     errorMessage.textContent = errorText
     errorAlert.style.display = 'block'
 
