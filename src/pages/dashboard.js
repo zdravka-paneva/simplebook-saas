@@ -10,6 +10,34 @@ const clientsTab = document.getElementById('clientsTab')
 
 let currentUser = null
 let currentProfile = null
+let logoutListenerSetUp = false
+
+// Set up logout listener ONLY ONCE globally (not per checkAuth)
+function setupLogoutListener() {
+  if (logoutListenerSetUp) {
+    console.log('📊 DASHBOARD: Logout listener already set up')
+    return
+  }
+  
+  logoutListenerSetUp = true
+  console.log('📊 DASHBOARD: Setting up logout listener')
+  
+  let firstCallIgnored = false
+  onAuthStateChange((session) => {
+    // Ignore the first call (it's just checking current session)
+    if (!firstCallIgnored) {
+      firstCallIgnored = true
+      console.log('📊 DASHBOARD: First onAuthStateChange call (ignoring)')
+      return
+    }
+    
+    // From second call onwards, listen for actual logout
+    if (!session) {
+      console.log('📊 DASHBOARD: User logged out - redirecting to login')
+      window.location.href = 'login.html'
+    }
+  })
+}
 
 // Check authentication on page load - SIMPLE AND DIRECT
 async function checkAuth() {
@@ -40,15 +68,7 @@ async function checkAuth() {
     if (adminLinkItem && accountType === 'admin') {
       adminLinkItem.style.display = 'block'
       console.log('📊 DASHBOARD: Admin user - skipping business-specific setup')
-      
-      // Set up logout listener ONCE after successful auth
-      onAuthStateChange((session) => {
-        if (!session) {
-          console.log('📊 DASHBOARD: Session expired - logging out')
-          window.location.href = 'login.html'
-        }
-      })
-      
+      setupLogoutListener()
       return true
     }
 
@@ -89,13 +109,8 @@ async function checkAuth() {
     // Load dashboard data
     await loadDashboardData()
     
-    // Set up logout listener ONCE after successful auth
-    onAuthStateChange((session) => {
-      if (!session) {
-        console.log('📊 DASHBOARD: Session expired - logging out')
-        window.location.href = 'login.html'
-      }
-    })
+    // Set up logout listener after successful auth
+    setupLogoutListener()
     
     return true
 
