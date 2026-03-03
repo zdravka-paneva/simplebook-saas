@@ -778,3 +778,156 @@ removePictureBtn.addEventListener('click', () => {
   removePictureBtn.style.display = 'none'
 })
 
+// ─── PDF Export ───────────────────────────────────────────────────────────────
+
+window.exportAppointmentsPDF = function(filter = 'all') {
+  const { jsPDF } = window.jspdf
+
+  if (!jsPDF) {
+    alert('PDF library not loaded. Please refresh the page.')
+    return
+  }
+
+  // Filter data
+  const data = filter === 'all'
+    ? allAppointmentsData
+    : allAppointmentsData.filter(a => a.status === filter)
+
+  if (data.length === 0) {
+    alert(`No ${filter === 'all' ? '' : filter + ' '}appointments to export.`)
+    return
+  }
+
+  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' })
+
+  // ── Header ──
+  const businessName = document.getElementById('businessName')?.textContent?.trim()
+    || document.getElementById('userEmail')?.textContent?.trim()
+    || 'Business'
+
+  const now = new Date()
+  const dateStr = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })
+  const filterLabel = filter === 'all' ? 'All Appointments' : `${filter.charAt(0).toUpperCase() + filter.slice(1)} Appointments`
+
+  // Logo text (purple)
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(18)
+  doc.setTextColor(103, 126, 234)   // --primary-color #667eea
+  doc.text('SimpleBook', 14, 16)
+
+  // Business name
+  doc.setFontSize(11)
+  doc.setTextColor(26, 32, 44)       // --text-primary #1a202c
+  doc.text(businessName, 14, 23)
+
+  // Report title
+  doc.setFontSize(14)
+  doc.setFont('helvetica', 'bold')
+  doc.setTextColor(26, 32, 44)
+  doc.text(filterLabel, 14, 33)
+
+  // Generated date (right-aligned)
+  doc.setFontSize(9)
+  doc.setFont('helvetica', 'normal')
+  doc.setTextColor(100, 116, 139)    // --text-secondary
+  doc.text(`Generated: ${dateStr}`, 283, 16, { align: 'right' })
+  doc.text(`Total: ${data.length} record${data.length !== 1 ? 's' : ''}`, 283, 22, { align: 'right' })
+
+  // Divider line
+  doc.setDrawColor(226, 232, 240)    // --border-color
+  doc.setLineWidth(0.4)
+  doc.line(14, 38, 283, 38)
+
+  // ── Table ──
+  const statusColors = {
+    confirmed: [220, 252, 231],   // green-50
+    pending:   [254, 249, 195],   // yellow-50
+    completed: [224, 242, 254],   // blue-50
+    cancelled: [254, 226, 226],   // red-50
+  }
+  const statusText = {
+    confirmed: [22, 101, 52],
+    pending:   [113, 63, 18],
+    completed: [23, 37, 84],
+    cancelled: [153, 27, 27],
+  }
+
+  const tableRows = data.map(appt => {
+    const apptDate = new Date(appt.scheduled_at)
+    const dateFormatted = apptDate.toLocaleDateString('en-GB', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' })
+    const timeFormatted = apptDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    return [
+      appt.clients?.full_name || '—',
+      appt.clients?.email || '—',
+      appt.clients?.phone || '—',
+      appt.services?.name || '—',
+      `${appt.services?.duration_minutes || 0} min`,
+      `$${appt.services?.price || 0}`,
+      `${dateFormatted}  ${timeFormatted}`,
+      appt.status,
+      appt.notes || '—',
+    ]
+  })
+
+  doc.autoTable({
+    startY: 42,
+    head: [['Client', 'Email', 'Phone', 'Service', 'Duration', 'Price', 'Date & Time', 'Status', 'Notes']],
+    body: tableRows,
+    styles: {
+      font: 'helvetica',
+      fontSize: 8.5,
+      cellPadding: 3,
+      textColor: [26, 32, 44],
+      lineColor: [226, 232, 240],
+      lineWidth: 0.2,
+    },
+    headStyles: {
+      fillColor: [103, 126, 234],
+      textColor: 255,
+      fontStyle: 'bold',
+      fontSize: 8.5,
+    },
+    columnStyles: {
+      0: { fontStyle: 'bold', cellWidth: 32 },
+      1: { cellWidth: 44 },
+      2: { cellWidth: 26 },
+      3: { cellWidth: 32 },
+      4: { cellWidth: 18, halign: 'center' },
+      5: { cellWidth: 18, halign: 'right' },
+      6: { cellWidth: 44 },
+      7: { cellWidth: 22, halign: 'center' },
+      8: { cellWidth: 'auto' },
+    },
+    alternateRowStyles: { fillColor: [248, 250, 252] },
+    // Colour-code the status cell
+    didParseCell(hookData) {
+      if (hookData.column.index === 7 && hookData.section === 'body') {
+        const status = hookData.cell.raw
+        if (statusColors[status]) {
+          hookData.cell.styles.fillColor = statusColors[status]
+          hookData.cell.styles.textColor = statusText[status]
+          hookData.cell.styles.fontStyle = 'bold'
+        }
+      }
+    },
+    margin: { left: 14, right: 14 },
+  })
+
+  // ── Footer on each page ──
+  const pageCount = doc.internal.getNumberOfPages()
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i)
+    doc.setFontSize(8)
+    doc.setTextColor(148, 163, 184)
+    doc.text(
+      `SimpleBook — ${filterLabel} — ${dateStr}   |   Page ${i} of ${pageCount}`,
+      14,
+      doc.internal.pageSize.height - 8
+    )
+  }
+
+  const filename = `simplebook_${filter}_appointments_${now.toISOString().slice(0, 10)}.pdf`
+  doc.save(filename)
+}
+
+
