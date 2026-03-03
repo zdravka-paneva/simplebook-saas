@@ -409,7 +409,7 @@ async function initPage() {
       if (profile.business_image_url) {
         const photoContainer = document.getElementById('businessPhotoContainer')
         if (photoContainer) {
-          photoContainer.innerHTML = `<img src="${profile.business_image_url}" alt="${profile.business_name}" class="rounded-3 mb-3 w-100" style="max-height:200px; object-fit:cover;">`
+          photoContainer.innerHTML = `<img src="${profile.business_image_url}" alt="${profile.business_name}" style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy">`
         }
       }
 

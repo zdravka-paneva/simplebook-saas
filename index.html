@@ -1,14 +1,285 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SimpleBook - Smart Appointment Booking for Small Businesses</title>
+  <title>SimpleBook &mdash; Appointments, Simplified</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="/src/style.css">
+  <link rel="stylesheet" href="src/style.css">
+  <style>
+    /* â”€â”€ HERO OVERRIDE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+    .sb-hero {
+      background: var(--primary-gradient);
+      min-height: 88vh;
+      display: flex;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+    /* decorative circles */
+    .sb-hero::before {
+      content: '';
+      position: absolute;
+      width: 700px; height: 700px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 50%;
+      top: -200px; right: -150px;
+      pointer-events: none;
+    }
+    .sb-hero::after {
+      content: '';
+      position: absolute;
+      width: 480px; height: 480px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 50%;
+      bottom: -180px; left: -80px;
+      pointer-events: none;
+    }
+    /* eyebrow pill */
+    .sb-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.9);
+      font-size: 0.775rem;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      border-radius: 30px;
+      margin-bottom: 28px;
+    }
+    .sb-eyebrow-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #4ade80;
+      box-shadow: 0 0 0 3px rgba(74,222,128,0.25);
+    }
+    /* headline */
+    .sb-hero h1 {
+      font-size: clamp(2.6rem, 5.5vw, 4rem);
+      font-weight: 800;
+      line-height: 1.09;
+      letter-spacing: -0.03em;
+      color: #fff;
+      margin-bottom: 22px;
+    }
+    .sb-hero h1 em {
+      font-style: normal;
+      opacity: 0.82;
+    }
+    /* sub */
+    .sb-hero .sb-sub {
+      font-size: 1.1rem;
+      color: rgba(255,255,255,0.72);
+      line-height: 1.75;
+      max-width: 460px;
+      margin-bottom: 42px;
+    }
+    /* CTA row */
+    .sb-ctas { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 48px; }
+    .sb-btn-primary {
+      background: #fff;
+      color: var(--primary-color) !important;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      padding: 14px 30px;
+      border-radius: 10px;
+      border: none;
+      text-decoration: none;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.18);
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .sb-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(0,0,0,0.24); }
+    .sb-btn-secondary {
+      background: transparent;
+      color: rgba(255,255,255,0.9) !important;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: 0.95rem;
+      padding: 14px 30px;
+      border-radius: 10px;
+      border: 2px solid rgba(255,255,255,0.35);
+      text-decoration: none;
+      transition: border-color 0.2s, background 0.2s, transform 0.2s;
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .sb-btn-secondary:hover { border-color: rgba(255,255,255,0.75); background: rgba(255,255,255,0.08); transform: translateY(-2px); }
+    /* trust line */
+    .sb-trust { display: flex; flex-wrap: wrap; gap: 20px; }
+    .sb-trust-item {
+      display: flex; align-items: center; gap: 7px;
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.55);
+      font-weight: 500;
+    }
+    .sb-trust-check {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: rgba(74,222,128,0.18);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    /* right visual card */
+    .sb-app-card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 20px;
+      overflow: hidden;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 28px 64px rgba(0,0,0,0.28);
+    }
+    .sb-app-toolbar {
+      background: rgba(255,255,255,0.05);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding: 13px 20px;
+      display: flex; align-items: center; gap: 7px;
+    }
+    .sb-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .sb-app-url {
+      margin-left: 8px;
+      background: rgba(0,0,0,0.15);
+      border-radius: 6px;
+      padding: 3px 12px;
+      font-size: 0.74rem;
+      color: rgba(255,255,255,0.35);
+      font-weight: 500;
+    }
+    .sb-booking-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 22px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .sb-booking-row:last-of-type { border-bottom: none; }
+    .sb-biz-name { font-weight: 600; font-size: 0.88rem; color: rgba(255,255,255,0.88); }
+    .sb-biz-meta { font-size: 0.75rem; color: rgba(255,255,255,0.38); margin-top: 2px; }
+    .sb-status {
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em;
+      text-transform: uppercase; padding: 4px 10px; border-radius: 20px;
+    }
+    .s-confirmed { background: rgba(74,222,128,0.14); color: #4ade80; }
+    .s-pending   { background: rgba(251,191,36,0.14); color: #fbbf24; }
+    .s-new       { background: rgba(167,139,250,0.18); color: #c4b5fd; }
+    .sb-app-footer {
+      background: rgba(0,0,0,0.1);
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 22px;
+    }
+    .sb-app-footer span { font-size: 0.79rem; color: rgba(255,255,255,0.3); }
+    .sb-app-footer a { font-size: 0.79rem; color: rgba(255,255,255,0.6); font-weight: 600; text-decoration: none; }
+    .sb-app-footer a:hover { color: #fff; }
+    /* â”€â”€ SECTIONS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+    .sb-section { padding: 88px 0; }
+    .sb-section-alt { background: var(--light-bg); }
+    .sb-label {
+      font-size: 0.74rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--primary-color); margin-bottom: 10px;
+    }
+    .sb-title {
+      font-size: clamp(1.7rem, 3vw, 2.3rem);
+      font-weight: 800; letter-spacing: -0.02em;
+      color: var(--text-primary); margin-bottom: 14px;
+    }
+    /* who cards */
+    .sb-who-card {
+      background: #fff;
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 38px 34px;
+      height: 100%;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .sb-who-card:hover { box-shadow: var(--shadow-xl); transform: translateY(-4px); }
+    .sb-who-icon {
+      width: 54px; height: 54px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 20px;
+    }
+    .sb-who-icon.purple { background: rgba(103,126,234,0.12); }
+    .sb-who-icon.purple svg { stroke: var(--primary-color); }
+    .sb-who-icon.pink   { background: rgba(240,147,251,0.12); }
+    .sb-who-icon.pink svg { stroke: var(--accent-color); }
+    .sb-who-card h3 { font-size: 1.2rem; font-weight: 800; margin-bottom: 10px; }
+    .sb-who-card > p { color: var(--text-secondary); font-size: 0.93rem; line-height: 1.7; margin-bottom: 22px; }
+    .sb-feat-list { list-style: none; padding: 0; margin: 0 0 28px; }
+    .sb-feat-list li {
+      font-size: 0.88rem; color: var(--text-secondary);
+      padding: 7px 0; display: flex; align-items: flex-start; gap: 10px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .sb-feat-list li:last-child { border-bottom: none; }
+    .sb-check {
+      width: 18px; height: 18px; border-radius: 5px;
+      background: rgba(103,126,234,0.12);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px;
+    }
+    .sb-check svg { width: 10px; height: 10px; stroke: var(--primary-color); fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+    .sb-check.pink { background: rgba(240,147,251,0.12); }
+    .sb-check.pink svg { stroke: var(--accent-color); }
+    /* type chips */
+    .sb-chip {
+      background: #fff; border: 1px solid var(--border-color);
+      border-radius: 30px; padding: 8px 20px;
+      font-size: 0.84rem; font-weight: 500; color: var(--text-secondary);
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+    .sb-chip:hover { background: rgba(103,126,234,0.06); border-color: rgba(103,126,234,0.3); color: var(--primary-color); }
+    /* feat items */
+    .sb-feat-item { display: flex; gap: 18px; align-items: flex-start; }
+    .sb-feat-icon {
+      width: 46px; height: 46px; border-radius: 12px;
+      background: rgba(103,126,234,0.1);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;
+    }
+    .sb-feat-icon svg { width: 20px; height: 20px; stroke: var(--primary-color); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .sb-feat-icon.pink { background: rgba(240,147,251,0.1); }
+    .sb-feat-icon.pink svg { stroke: var(--accent-color); }
+    .sb-feat-item h5 { font-size: 0.97rem; font-weight: 700; color: var(--text-primary); margin-bottom: 5px; }
+    .sb-feat-item p  { font-size: 0.87rem; color: var(--text-secondary); line-height: 1.65; margin: 0; }
+    /* steps */
+    .sb-step-label {
+      display: inline-block; font-size: 0.72rem; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 5px 14px; border-radius: 6px; margin-bottom: 24px;
+    }
+    .sb-step-label.purple { background: rgba(103,126,234,0.1); color: var(--primary-color); }
+    .sb-step-label.pink   { background: rgba(240,147,251,0.1); color: #c026d3; }
+    .sb-step {
+      display: flex; gap: 16px; align-items: flex-start;
+      background: #fff; border: 1px solid var(--border-color);
+      border-radius: 12px; padding: 16px 18px;
+    }
+    .sb-step-num {
+      width: 36px; height: 36px; border-radius: 9px;
+      background: var(--primary-gradient); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 0.9rem; flex-shrink: 0;
+    }
+    .sb-step-num.pink { background: linear-gradient(135deg, #f093fb, #c026d3); }
+    .sb-step h5 { font-size: 0.92rem; font-weight: 700; color: var(--text-primary); margin-bottom: 3px; }
+    .sb-step p  { font-size: 0.83rem; color: var(--text-secondary); margin: 0; line-height: 1.6; }
+    .sb-step-line { width: 1px; height: 14px; background: var(--border-color); margin: 0 0 0 26px; }
+    /* CTA section */
+    .sb-cta-section {
+      background: var(--primary-gradient);
+      padding: 88px 0;
+    }
+    .sb-cta-section h2 { color: #fff; font-size: clamp(2rem, 4vw, 2.8rem); letter-spacing: -0.025em; margin-bottom: 14px; }
+    .sb-cta-section p  { color: rgba(255,255,255,0.65); font-size: 1rem; margin-bottom: 36px; }
+    @media (max-width: 768px) {
+      .sb-hero { min-height: auto; padding: 70px 0 60px; }
+      .sb-hero h1 { font-size: 2.4rem; }
+      .sb-section { padding: 60px 0; }
+    }
+  </style>
 </head>
 <body>
-  <!-- Navigation -->
+
+  <!-- NAV (matches all internal pages exactly) -->
   <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top">
     <div class="container">
       <a class="navbar-brand fw-bold" href="index.html">
@@ -18,20 +289,20 @@
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto">
+        <ul class="navbar-nav ms-auto align-items-center">
           <li class="nav-item">
-            <a class="nav-link" href="#features">Features</a>
+            <a class="nav-link" href="#features" id="navPricingLink">Features</a>
           </li>
-          <li class="nav-item" id="navPricingLink">
-            <a class="nav-link" href="#pricing">Pricing</a>
+          <li class="nav-item">
+            <a class="nav-link" href="#howItWorksSection">How it works</a>
           </li>
-          <li class="nav-item" id="navLoginLink">
-            <a class="nav-link" href="login.html">Login</a>
+          <li class="nav-item">
+            <a class="nav-link" href="login.html" id="navLoginLink">Log in</a>
           </li>
-          <li class="nav-item" id="navSignupLink">
-            <a class="btn btn-primary text-white ms-2" href="register.html">Sign Up</a>
+          <li class="nav-item ms-1">
+            <a class="btn btn-primary btn-sm px-3 py-2" href="register.html" id="navSignupLink">Sign up free</a>
           </li>
-          <!-- Shown when logged in -->
+          <!-- shown when logged in -->
           <li class="nav-item d-none" id="navDashboardLink">
             <a class="nav-link fw-medium" href="dashboard.html" id="navDashboardAnchor">Dashboard</a>
           </li>
@@ -43,207 +314,349 @@
     </div>
   </nav>
 
-  <!-- Hero Section -->
-  <section id="heroSection" class="hero-section py-5" style="background: linear-gradient(135deg, #0066cc 0%, #004299 100%); color: white;">
-    <div class="container py-5">
-      <div class="row align-items-center">
-        <div class="col-lg-6 mb-4 mb-lg-0">
-          <h1 class="display-4 fw-bold mb-4">Book Appointments Effortlessly</h1>
-          <p class="lead mb-4">SimpleBook helps small businesses manage appointments, services, and customers in one beautiful, easy-to-use platform.</p>
-          <div class="d-flex gap-3 flex-wrap">
-            <a href="register.html" class="btn btn-warning btn-lg fw-bold">Get Started Free</a>
-            <a href="#features" class="btn btn-outline-light btn-lg fw-bold">Learn More</a>
-          </div>
-          <p class="mt-4 small">✓ No credit card required • ✓ 14-day free trial • ✓ Setup in 5 minutes</p>
-        </div>
+
+  <!-- â”€â”€ HERO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+  <section class="sb-hero" id="heroSection">
+    <div class="container position-relative" style="z-index:1;">
+      <div class="row align-items-center g-5">
+
+        <!-- Left column -->
         <div class="col-lg-6">
-          <div class="card border-0 shadow-lg p-4" style="background: rgba(255,255,255,0.95);">
-            <div class="card-body text-dark">
-              <h5 class="card-title mb-3">Recent Bookings</h5>
-              <div class="booking-preview">
-                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
-                  <div>
-                    <div class="fw-bold">Hair Styling</div>
-                    <small class="text-muted">Mar 1, 2:00 PM</small>
-                  </div>
-                  <span class="badge bg-success">Confirmed</span>
-                </div>
-                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
-                  <div>
-                    <div class="fw-bold">Massage Therapy</div>
-                    <small class="text-muted">Mar 2, 3:30 PM</small>
-                  </div>
-                  <span class="badge bg-success">Confirmed</span>
-                </div>
-                <div class="d-flex justify-content-between align-items-center py-2">
-                  <div>
-                    <div class="fw-bold">Nail Care</div>
-                    <small class="text-muted">Mar 3, 11:00 AM</small>
-                  </div>
-                  <span class="badge bg-warning">Pending</span>
-                </div>
+          <div class="sb-eyebrow">
+            <span class="sb-eyebrow-dot"></span>
+            Smart appointment booking
+          </div>
+          <h1>
+            Every appointment<br>
+            starts with a<br>
+            <em>single link.</em>
+          </h1>
+          <p class="sb-sub">
+            SimpleBook gives businesses a beautiful booking page and gives clients a frictionless way to discover and reserve &mdash; all in one place.
+          </p>
+          <div class="sb-ctas">
+            <a href="register.html?type=business" class="sb-btn-primary">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="17"/><line x1="9.5" y1="14.5" x2="14.5" y2="14.5"/>
+              </svg>
+              I run a Business
+            </a>
+            <a href="register.html?type=client" class="sb-btn-secondary">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+              </svg>
+              I want to Book
+            </a>
+          </div>
+          <div class="sb-trust">
+            <span class="sb-trust-item">
+              <span class="sb-trust-check">
+                <svg width="9" height="9" viewBox="0 0 10 8" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 3.5 6.5 9 1"/></svg>
+              </span>
+              Free to start
+            </span>
+            <span class="sb-trust-item">
+              <span class="sb-trust-check">
+                <svg width="9" height="9" viewBox="0 0 10 8" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 3.5 6.5 9 1"/></svg>
+              </span>
+              No credit card
+            </span>
+            <span class="sb-trust-item">
+              <span class="sb-trust-check">
+                <svg width="9" height="9" viewBox="0 0 10 8" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 3.5 6.5 9 1"/></svg>
+              </span>
+              Ready in 5 minutes
+            </span>
+            <span class="sb-trust-item">
+              <span class="sb-trust-check">
+                <svg width="9" height="9" viewBox="0 0 10 8" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 3.5 6.5 9 1"/></svg>
+              </span>
+              Always free for clients
+            </span>
+          </div>
+        </div>
+
+        <!-- Right column: app preview -->
+        <div class="col-lg-6">
+          <div class="sb-app-card">
+            <div class="sb-app-toolbar">
+              <span class="sb-dot" style="background:#FF5F57;"></span>
+              <span class="sb-dot" style="background:#FEBC2E;"></span>
+              <span class="sb-dot" style="background:#28C840;"></span>
+              <span class="sb-app-url">simplebook.app / my-bookings</span>
+            </div>
+            <div class="sb-booking-row">
+              <div>
+                <div class="sb-biz-name">Luxe Hair Studio</div>
+                <div class="sb-biz-meta">Hair Styling &middot; Mon 10 Mar, 2:00 PM</div>
               </div>
+              <span class="sb-status s-confirmed">Confirmed</span>
+            </div>
+            <div class="sb-booking-row">
+              <div>
+                <div class="sb-biz-name">Zen Zone Spa</div>
+                <div class="sb-biz-meta">Full Body Massage &middot; Wed 12 Mar, 3:30 PM</div>
+              </div>
+              <span class="sb-status s-pending">Pending</span>
+            </div>
+            <div class="sb-booking-row">
+              <div>
+                <div class="sb-biz-name">FitPro Gym</div>
+                <div class="sb-biz-meta">Personal Training &middot; Fri 14 Mar, 9:00 AM</div>
+              </div>
+              <span class="sb-status s-new">New</span>
+            </div>
+            <div class="sb-app-footer">
+              <span>3 upcoming appointments</span>
+              <a href="register.html">View all &rarr;</a>
             </div>
           </div>
         </div>
+
       </div>
     </div>
   </section>
 
-  <!-- Features Section -->
-  <section id="features" data-section="features" class="py-5 bg-light">
+
+  <!-- â”€â”€ FOR WHOM â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+  <section class="sb-section sb-section-alt" id="forWhomSection">
     <div class="container">
       <div class="text-center mb-5">
-        <h2 class="display-5 fw-bold mb-3">Why Choose SimpleBook?</h2>
-        <p class="lead text-muted">Everything you need to manage your business appointments</p>
+        <div class="sb-label">Who it&rsquo;s for</div>
+        <h2 class="sb-title">Built for both sides of every appointment</h2>
+        <p class="text-muted mx-auto" style="max-width:500px;font-size:.97rem;line-height:1.75;">
+          Whether you own a business or you&rsquo;re looking to book one &mdash; SimpleBook works for you.
+        </p>
       </div>
       <div class="row g-4">
-        <!-- Feature 1 -->
-        <div class="col-md-6 col-lg-4">
-          <div class="card h-100 border-0 shadow-sm">
-            <div class="card-body text-center">
-              <div class="mb-3" style="font-size: 3rem;">📅</div>
-              <h5 class="card-title fw-bold">Smart Scheduling</h5>
-              <p class="card-text text-muted">Automated scheduling that respects your availability and reduces no-shows with smart reminders.</p>
+
+        <div class="col-md-6">
+          <div class="sb-who-card">
+            <div class="sb-who-icon purple">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="17"/><line x1="9.5" y1="14.5" x2="14.5" y2="14.5"/>
+              </svg>
             </div>
+            <h3>For Businesses</h3>
+            <p>Your own booking page, live in minutes. Clients find you, pick a service, and book &mdash; you stay in control with one tap confirmations.</p>
+            <ul class="sb-feat-list">
+              <li><span class="sb-check"><svg viewBox="0 0 10 8"><polyline points="1 4 3.5 6.5 9 1"/></svg></span>Custom page with services &amp; pricing</li>
+              <li><span class="sb-check"><svg viewBox="0 0 10 8"><polyline points="1 4 3.5 6.5 9 1"/></svg></span>Approve, confirm or cancel appointments</li>
+              <li><span class="sb-check"><svg viewBox="0 0 10 8"><polyline points="1 4 3.5 6.5 9 1"/></svg></span>Client management dashboard</li>
+              <li><span class="sb-check"><svg viewBox="0 0 10 8"><polyline points="1 4 3.5 6.5 9 1"/></svg></span>Real-time booking notifications</li>
+              <li><span class="sb-check"><svg viewBox="0 0 10 8"><polyline points="1 4 3.5 6.5 9 1"/></svg></span>Works for salons, clinics, gyms &amp; more</li>
+            </ul>
+            <a href="register.html?type=business" class="btn btn-primary px-4 py-2">Create your booking page &rarr;</a>
           </div>
         </div>
 
-        <!-- Feature 2 -->
-        <div class="col-md-6 col-lg-4">
-          <div class="card h-100 border-0 shadow-sm">
-            <div class="card-body text-center">
-              <div class="mb-3" style="font-size: 3rem;">👥</div>
-              <h5 class="card-title fw-bold">Client Management</h5>
-              <p class="card-text text-muted">Keep all your client information organized in one place with contact details and booking history.</p>
+        <div class="col-md-6">
+          <div class="sb-who-card">
+            <div class="sb-who-icon pink">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
             </div>
+            <h3>For Clients</h3>
+            <p>Discover local businesses, book in seconds, and track every appointment from one place. Completely free, no catch, forever.</p>
+            <ul class="sb-feat-list">
+              <li><span class="sb-check pink"><svg viewBox="0 0 10 8"><polyline points="1 4 3.5 6.5 9 1"/></svg></span>Browse by business type or city</li>
+              <li><span class="sb-check pink"><svg viewBox="0 0 10 8"><polyline points="1 4 3.5 6.5 9 1"/></svg></span>Instant booking &mdash; no phone calls</li>
+              <li><span class="sb-check pink"><svg viewBox="0 0 10 8"><polyline points="1 4 3.5 6.5 9 1"/></svg></span>Live confirmation notifications</li>
+              <li><span class="sb-check pink"><svg viewBox="0 0 10 8"><polyline points="1 4 3.5 6.5 9 1"/></svg></span>Manage &amp; cancel appointments easily</li>
+              <li><span class="sb-check pink"><svg viewBox="0 0 10 8"><polyline points="1 4 3.5 6.5 9 1"/></svg></span>Save favourite businesses</li>
+            </ul>
+            <a href="register.html?type=client" class="btn btn-warning px-4 py-2">Book your first appointment &rarr;</a>
           </div>
         </div>
 
-        <!-- Feature 3 -->
-        <div class="col-md-6 col-lg-4">
-          <div class="card h-100 border-0 shadow-sm">
-            <div class="card-body text-center">
-              <div class="mb-3" style="font-size: 3rem;">💰</div>
-              <h5 class="card-title fw-bold">Easy Payments</h5>
-              <p class="card-text text-muted">Integrated payment processing for quick, secure transactions directly from your booking page.</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Feature 4 -->
-        <div class="col-md-6 col-lg-4">
-          <div class="card h-100 border-0 shadow-sm">
-            <div class="card-body text-center">
-              <div class="mb-3" style="font-size: 3rem;">📱</div>
-              <h5 class="card-title fw-bold">Mobile Friendly</h5>
-              <p class="card-text text-muted">Fully responsive design that works beautifully on phones, tablets, and desktops.</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Feature 5 -->
-        <div class="col-md-6 col-lg-4">
-          <div class="card h-100 border-0 shadow-sm">
-            <div class="card-body text-center">
-              <div class="mb-3" style="font-size: 3rem;">🔐</div>
-              <h5 class="card-title fw-bold">Secure & Private</h5>
-              <p class="card-text text-muted">Enterprise-grade security with encrypted data and full compliance with privacy regulations.</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Feature 6 -->
-        <div class="col-md-6 col-lg-4">
-          <div class="card h-100 border-0 shadow-sm">
-            <div class="card-body text-center">
-              <div class="mb-3" style="font-size: 3rem;">⚡</div>
-              <h5 class="card-title fw-bold">Real-time Updates</h5>
-              <p class="card-text text-muted">Get instant notifications for new bookings, cancellations, and updates across all devices.</p>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   </section>
 
-  <!-- How It Works Section -->
-  <section id="howItWorksSection" class="py-5">
+
+  <!-- â”€â”€ BUSINESS TYPES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+  <section class="sb-section" style="padding:60px 0;">
     <div class="container">
       <div class="text-center mb-5">
-        <h2 class="display-5 fw-bold mb-3">How It Works</h2>
-        <p class="lead text-muted">Simple steps to get started in minutes</p>
+        <div class="sb-label">Business types</div>
+        <h2 class="sb-title" style="font-size:1.6rem;">Works for every appointment-based business</h2>
       </div>
-      <div class="row g-4">
-        <div class="col-md-6 col-lg-3">
-          <div class="text-center">
-            <div class="bg-primary text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 1.5rem;">1</div>
-            <h5 class="fw-bold">Sign Up</h5>
-            <p class="text-muted small">Create your free account in less than a minute</p>
-          </div>
-        </div>
-        <div class="col-md-6 col-lg-3">
-          <div class="text-center">
-            <div class="bg-primary text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 1.5rem;">2</div>
-            <h5 class="fw-bold">Add Services</h5>
-            <p class="text-muted small">List your services with prices and durations</p>
-          </div>
-        </div>
-        <div class="col-md-6 col-lg-3">
-          <div class="text-center">
-            <div class="bg-primary text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 1.5rem;">3</div>
-            <h5 class="fw-bold">Share Link</h5>
-            <p class="text-muted small">Share your booking page with customers</p>
-          </div>
-        </div>
-        <div class="col-md-6 col-lg-3">
-          <div class="text-center">
-            <div class="bg-primary text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 1.5rem;">4</div>
-            <h5 class="fw-bold">Get Bookings</h5>
-            <p class="text-muted small">Receive instant notifications for new appointments</p>
-          </div>
-        </div>
+      <div class="d-flex flex-wrap justify-content-center gap-2">
+        <span class="sb-chip">Hair Salons</span>
+        <span class="sb-chip">Spas &amp; Wellness</span>
+        <span class="sb-chip">Dental Clinics</span>
+        <span class="sb-chip">Gyms &amp; Fitness</span>
+        <span class="sb-chip">Barbers</span>
+        <span class="sb-chip">Nail Studios</span>
+        <span class="sb-chip">Yoga Studios</span>
+        <span class="sb-chip">Medical Clinics</span>
+        <span class="sb-chip">Consulting</span>
+        <span class="sb-chip">Education &amp; Tutoring</span>
+        <span class="sb-chip">Pet Care</span>
+        <span class="sb-chip" style="color:#94a3b8;cursor:default;">+ many more</span>
       </div>
     </div>
   </section>
 
-  <!-- CTA Section -->
-  <section id="ctaSection" class="py-5" style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); color: white;">
+
+  <!-- â”€â”€ FEATURES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+  <section class="sb-section sb-section-alt" id="features" data-section="features">
+    <div class="container">
+
+      <div class="row align-items-center g-5 mb-5">
+        <div class="col-lg-5">
+          <div class="sb-label">For businesses</div>
+          <h2 class="sb-title">Everything you need to run bookings</h2>
+          <p class="text-muted" style="font-size:.97rem;line-height:1.75;">One clean dashboard. No app installs for clients. Start taking bookings today.</p>
+        </div>
+        <div class="col-lg-6 offset-lg-1">
+          <div class="d-flex flex-column gap-4">
+            <div class="sb-feat-item">
+              <div class="sb-feat-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+              <div><h5>Your own booking page</h5><p>Share a single link. Clients pick a service and time &mdash; it lands in your dashboard instantly.</p></div>
+            </div>
+            <div class="sb-feat-item">
+              <div class="sb-feat-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div><h5>Approve &amp; manage appointments</h5><p>Confirm or cancel incoming requests with one click. Full control of your schedule.</p></div>
+            </div>
+            <div class="sb-feat-item">
+              <div class="sb-feat-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+              <div><h5>Client management</h5><p>All clients in one list with contact info and history &mdash; no spreadsheets needed.</p></div>
+            </div>
+            <div class="sb-feat-item">
+              <div class="sb-feat-icon"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+              <div><h5>Real-time notifications</h5><p>Alerted the moment a client books or cancels &mdash; no missed appointments.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr style="border-color:#e2e8f0;margin:10px 0 60px;">
+
+      <div class="row align-items-center g-5">
+        <div class="col-lg-6 order-lg-2">
+          <div class="sb-label">For clients</div>
+          <h2 class="sb-title">Booking, made effortless</h2>
+          <p class="text-muted" style="font-size:.97rem;line-height:1.75;">Discover, book and track &mdash; all from one place. Always 100% free.</p>
+        </div>
+        <div class="col-lg-5 order-lg-1">
+          <div class="d-flex flex-column gap-4">
+            <div class="sb-feat-item">
+              <div class="sb-feat-icon pink"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+              <div><h5>Discover local businesses</h5><p>Browse by type or city. Find salons, spas, clinics and more in seconds.</p></div>
+            </div>
+            <div class="sb-feat-item">
+              <div class="sb-feat-icon pink"><svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18" stroke-width="2.5"/></svg></div>
+              <div><h5>Book from any device</h5><p>Works perfectly on phone, tablet or desktop. Book anytime, without calling.</p></div>
+            </div>
+            <div class="sb-feat-item">
+              <div class="sb-feat-icon pink"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+              <div><h5>Instant confirmation</h5><p>Know the moment your booking is confirmed. No more waiting and wondering.</p></div>
+            </div>
+            <div class="sb-feat-item">
+              <div class="sb-feat-icon pink"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+              <div><h5>Save your favourites</h5><p>Star businesses you love. Rebooking your regular spot takes three taps.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- â”€â”€ HOW IT WORKS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+  <section class="sb-section" id="howItWorksSection">
+    <div class="container">
+      <div class="text-center mb-5">
+        <div class="sb-label">How it works</div>
+        <h2 class="sb-title">Up and running in minutes</h2>
+        <p class="text-muted mx-auto" style="max-width:480px;font-size:.97rem;line-height:1.75;">
+          Getting started takes just a few steps &mdash; for businesses and clients alike.
+        </p>
+      </div>
+      <div class="row g-5">
+
+        <div class="col-md-6">
+          <span class="sb-step-label purple">For Businesses</span>
+          <div class="d-flex flex-column gap-2">
+            <div class="sb-step"><div class="sb-step-num">1</div><div><h5>Create your account</h5><p>Sign up in under a minute. Choose &ldquo;Business&rdquo; and enter your details.</p></div></div>
+            <div class="sb-step-line"></div>
+            <div class="sb-step"><div class="sb-step-num">2</div><div><h5>Add your services</h5><p>List what you offer &mdash; name, duration, price. As many as you need.</p></div></div>
+            <div class="sb-step-line"></div>
+            <div class="sb-step"><div class="sb-step-num">3</div><div><h5>Share your booking link</h5><p>Copy your unique link and share it on Instagram, WhatsApp, or your website.</p></div></div>
+            <div class="sb-step-line"></div>
+            <div class="sb-step"><div class="sb-step-num">4</div><div><h5>Approve &amp; manage</h5><p>Review incoming bookings and confirm with one click.</p></div></div>
+          </div>
+          <div class="mt-4"><a href="register.html?type=business" class="btn btn-primary px-4 py-2">Get started free &rarr;</a></div>
+        </div>
+
+        <div class="col-md-6">
+          <span class="sb-step-label pink">For Clients</span>
+          <div class="d-flex flex-column gap-2">
+            <div class="sb-step"><div class="sb-step-num pink">1</div><div><h5>Create a free account</h5><p>Sign up as a client &mdash; takes 30 seconds, always free.</p></div></div>
+            <div class="sb-step-line"></div>
+            <div class="sb-step"><div class="sb-step-num pink">2</div><div><h5>Discover businesses</h5><p>Browse by type and city or open a booking link shared with you.</p></div></div>
+            <div class="sb-step-line"></div>
+            <div class="sb-step"><div class="sb-step-num pink">3</div><div><h5>Pick a service &amp; time</h5><p>Choose what you need and pick a date and time that works for you.</p></div></div>
+            <div class="sb-step-line"></div>
+            <div class="sb-step"><div class="sb-step-num pink">4</div><div><h5>Show up &amp; enjoy</h5><p>Get a live confirmation and track everything in My Bookings.</p></div></div>
+          </div>
+          <div class="mt-4"><a href="register.html?type=client" class="btn btn-warning px-4 py-2">Book your first appointment &rarr;</a></div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- â”€â”€ FINAL CTA â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+  <section class="sb-cta-section" id="ctaSection">
     <div class="container text-center">
-      <h2 class="display-5 fw-bold mb-4">Ready to Grow Your Business?</h2>
-      <p class="lead mb-4">Join thousands of businesses using SimpleBook to manage appointments effortlessly.</p>
-      <a href="register.html" class="btn btn-light btn-lg fw-bold px-5">Start Your Free Trial</a>
+      <h2>Ready to transform<br>your appointments?</h2>
+      <p>Join SimpleBook &mdash; free to start for businesses, always free for clients.</p>
+      <div class="d-flex justify-content-center gap-3 flex-wrap">
+        <a href="register.html?type=business" class="btn btn-light btn-lg px-5 py-3 fw-bold">I run a Business</a>
+        <a href="register.html?type=client" class="btn btn-outline-light btn-lg px-5 py-3">I want to Book</a>
+      </div>
     </div>
   </section>
 
-  <!-- Footer -->
+
+  <!-- â”€â”€ FOOTER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
   <footer class="bg-dark text-white py-5">
     <div class="container">
       <div class="row g-4">
         <div class="col-md-4">
-          <h5 class="fw-bold mb-3">SimpleBook</h5>
-          <p class="text-muted small">Smart appointment booking for small businesses.</p>
+          <div class="navbar-brand fw-bold mb-2 d-block">
+            <span style="color:#667eea;">Simple</span><span style="color:#f093fb;">Book</span>
+          </div>
+          <p class="text-muted small">The simplest way to book and manage appointments, for businesses and clients alike.</p>
         </div>
-        <div class="col-md-4">
-          <h5 class="fw-bold mb-3">Quick Links</h5>
-          <ul class="list-unstyled small">
-            <li><a href="#features" class="text-muted text-decoration-none">Features</a></li>
-            <li><a href="login.html" class="text-muted text-decoration-none">Login</a></li>
-            <li><a href="register.html" class="text-muted text-decoration-none">Sign Up</a></li>
-          </ul>
+        <div class="col-md-2 offset-md-2">
+          <h6 class="text-muted text-uppercase small fw-bold mb-3" style="letter-spacing:.07em;">Product</h6>
+          <a href="#features" class="text-muted small text-decoration-none d-block mb-2">Features</a>
+          <a href="#howItWorksSection" class="text-muted small text-decoration-none d-block mb-2">How it works</a>
+          <a href="#forWhomSection" class="text-muted small text-decoration-none d-block mb-2">Who it&rsquo;s for</a>
         </div>
-        <div class="col-md-4">
-          <h5 class="fw-bold mb-3">Legal</h5>
-          <ul class="list-unstyled small">
-            <li><a href="#" class="text-muted text-decoration-none">Privacy Policy</a></li>
-            <li><a href="#" class="text-muted text-decoration-none">Terms of Service</a></li>
-            <li><a href="#" class="text-muted text-decoration-none">Contact Us</a></li>
-          </ul>
+        <div class="col-md-2">
+          <h6 class="text-muted text-uppercase small fw-bold mb-3" style="letter-spacing:.07em;">Account</h6>
+          <a href="login.html" class="text-muted small text-decoration-none d-block mb-2">Log in</a>
+          <a href="register.html?type=business" class="text-muted small text-decoration-none d-block mb-2">Business sign up</a>
+          <a href="register.html?type=client" class="text-muted small text-decoration-none d-block mb-2">Client sign up</a>
+        </div>
+        <div class="col-md-2">
+          <h6 class="text-muted text-uppercase small fw-bold mb-3" style="letter-spacing:.07em;">Legal</h6>
+          <a href="#" class="text-muted small text-decoration-none d-block mb-2">Privacy Policy</a>
+          <a href="#" class="text-muted small text-decoration-none d-block mb-2">Terms of Service</a>
+          <a href="#" class="text-muted small text-decoration-none d-block mb-2">Contact</a>
         </div>
       </div>
-      <hr class="bg-secondary my-4">
-      <div class="text-center">
+      <hr class="border-secondary my-4">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
         <p class="text-muted small mb-0">&copy; 2026 SimpleBook. All rights reserved.</p>
+        <p class="text-muted small mb-0">Built for small businesses</p>
       </div>
     </div>
   </footer>

@@ -282,8 +282,8 @@ function renderAppointments() {
             <div class="d-flex align-items-center gap-3">
               <div class="flex-shrink-0">
                 ${biz.business_image_url
-                  ? `<img src="${biz.business_image_url}" class="rounded-circle" style="width:50px;height:50px;object-fit:cover;" alt="">`
-                  : `<div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center" style="width:50px;height:50px;font-size:1.3rem;">🏢</div>`}
+                  ? `<img src="${biz.business_image_url}" class="rounded-3" style="width:58px;height:58px;object-fit:cover;" alt="" loading="lazy">`
+                  : `<div class="rounded-3 d-flex align-items-center justify-content-center fw-bold text-white" style="width:58px;height:58px;font-size:1.4rem;background:linear-gradient(135deg,#0066cc,#004299);">${(biz.business_name||'B')[0].toUpperCase()}</div>`}
               </div>
               <div>
                 <div class="fw-bold">${biz.business_name || 'Business'}</div>
@@ -338,27 +338,26 @@ function renderFavorites() {
         const biz    = fav.profiles || {}
         const bizId  = fav.business_profile_id
         const bookUrl = `booking.html?business=${bizId}`
+
+        const coverImg = biz.business_image_url
+          ? `<img src="${biz.business_image_url}" alt="${biz.business_name}" style="width:100%;height:140px;object-fit:cover;" loading="lazy">`
+          : `<div style="width:100%;height:140px;background:linear-gradient(135deg,#fff8e1 0%,#ffe082 100%);display:flex;align-items:center;justify-content:center;font-size:3rem;">\uD83C\uDFE2</div>`
+
         return `
         <div class="col-12 col-sm-6 col-lg-4">
-          <div class="card border-0 shadow-sm fav-card h-100">
-            <div class="card-body p-4 d-flex flex-column">
-              <div class="d-flex align-items-center gap-3 mb-3">
-                <div>
-                  ${biz.business_image_url
-                    ? `<img src="${biz.business_image_url}" class="rounded-circle" style="width:56px;height:56px;object-fit:cover;" alt="">`
-                    : `<div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center" style="width:56px;height:56px;font-size:1.5rem;">🏢</div>`}
-                </div>
-                <div>
-                  <div class="fw-bold">${biz.business_name || 'Business'}</div>
-                  <div class="small text-muted">${biz.business_type || ''}</div>
-                </div>
-              </div>
+          <div class="card border-0 shadow-sm fav-card h-100" style="border-radius:14px;overflow:hidden;">
+            <div class="position-relative">
+              ${coverImg}
+              <span class="position-absolute badge px-2 py-1" style="top:10px;left:10px;background:rgba(0,0,0,.5);color:#fff;font-size:.7rem;border-radius:20px;">${biz.business_type || ''}</span>
+            </div>
+            <div class="card-body p-3 d-flex flex-column">
+              <div class="fw-bold mb-3">${biz.business_name || 'Business'}</div>
               <div class="mt-auto d-flex gap-2">
-                <a href="${bookUrl}" class="btn btn-primary btn-sm flex-grow-1 fw-medium">📅 Book Now</a>
+                <a href="${bookUrl}" class="btn btn-primary btn-sm flex-grow-1 fw-medium" style="border-radius:8px;">\uD83D\uDCC5 Book Now</a>
                 <button class="btn btn-outline-danger btn-sm remove-fav-btn"
                         data-biz-id="${bizId}"
                         data-biz-name="${biz.business_name || ''}"
-                        title="Remove from favorites">⭐</button>
+                        title="Remove from favorites" style="border-radius:8px;">\u2B50</button>
               </div>
             </div>
           </div>
@@ -438,31 +437,34 @@ function renderDiscover() {
   grid.innerHTML = filtered.map(biz => {
     const faved    = isFav(biz.id)
     const bookUrl  = `booking.html?business=${biz.id}`
-    const avatar   = biz.business_image_url
-      ? `<img src="${biz.business_image_url}" class="biz-avatar" alt="">`
-      : `<div class="biz-avatar-placeholder">🏢</div>`
     const descSnippet = biz.business_description
-      ? biz.business_description.slice(0, 100) + (biz.business_description.length > 100 ? '…' : '')
+      ? biz.business_description.slice(0, 90) + (biz.business_description.length > 90 ? '\u2026' : '')
       : ''
+
+    const coverImg = biz.business_image_url
+      ? `<img src="${biz.business_image_url}" alt="${biz.business_name}" style="width:100%;height:160px;object-fit:cover;" loading="lazy">`
+      : `<div style="width:100%;height:160px;background:linear-gradient(135deg,#e8f0fe 0%,#c5d8ff 100%);display:flex;align-items:center;justify-content:center;font-size:3rem;">\uD83C\uDFE2</div>`
+
     return `
     <div class="col-12 col-sm-6 col-xl-4">
-      <div class="card border-0 shadow-sm biz-card h-100">
-        <div class="card-body p-4 d-flex flex-column">
-          <div class="d-flex align-items-start gap-3 mb-3">
-            ${avatar}
-            <div class="flex-grow-1 min-width-0">
-              <div class="fw-bold text-truncate">${biz.business_name || 'Business'}</div>
-              <div class="small text-primary fw-medium">${biz.business_type || ''}</div>
-              ${biz.city ? `<div class="small text-muted">📍 ${biz.city}</div>` : ''}
-            </div>
-            <button class="btn btn-sm ${faved ? 'btn-warning' : 'btn-outline-secondary'} disc-fav-btn flex-shrink-0"
-                    data-biz-id="${biz.id}" data-biz-name="${biz.business_name || ''}"
-                    title="${faved ? 'Remove from favorites' : 'Save as favorite'}">
-              ${faved ? '⭐' : '☆'}
-            </button>
-          </div>
-          ${descSnippet ? `<p class="small text-muted mb-3 flex-grow-1">${descSnippet}</p>` : '<div class="flex-grow-1"></div>'}
-          <a href="${bookUrl}" class="btn btn-primary btn-sm fw-medium w-100">📅 Book Now</a>
+      <div class="card border-0 shadow-sm biz-card h-100" style="border-radius:14px;overflow:hidden;">
+        <!-- Cover image -->
+        <div class="position-relative">
+          ${coverImg}
+          <span class="position-absolute badge fw-medium px-2 py-1" style="top:10px;left:10px;background:rgba(0,0,0,.55);color:#fff;font-size:.72rem;border-radius:20px;">${biz.business_type || ''}</span>
+          <button class="position-absolute btn btn-sm ${faved ? 'btn-warning' : 'btn-light'} disc-fav-btn"
+            style="top:8px;right:10px;width:34px;height:34px;padding:0;border-radius:50%;font-size:1rem;"
+            data-biz-id="${biz.id}" data-biz-name="${biz.business_name || ''}"
+            title="${faved ? 'Remove from favorites' : 'Save as favorite'}">
+            ${faved ? '\u2B50' : '\u2606'}
+          </button>
+        </div>
+        <!-- Card body -->
+        <div class="card-body p-3 d-flex flex-column">
+          <div class="fw-bold mb-1" style="font-size:1rem;">${biz.business_name || 'Business'}</div>
+          ${biz.city ? `<div class="small text-muted mb-2">\uD83D\uDCCD ${biz.city}</div>` : ''}
+          ${descSnippet ? `<p class="small text-muted mb-3 flex-grow-1" style="line-height:1.4;">${descSnippet}</p>` : '<div class="flex-grow-1"></div>'}
+          <a href="${bookUrl}" class="btn btn-primary btn-sm fw-medium w-100" style="border-radius:8px;">\uD83D\uDCC5 Book Now</a>
         </div>
       </div>
     </div>`
