@@ -362,3 +362,153 @@ export async function getDownloadUrl(filePath) {
 
   return data.publicUrl
 }
+
+/**
+ * Get all appointments for the currently logged-in client
+ * Uses RLS: appointments where clients.profile_id = auth.uid()
+ * @returns {Promise<Array>} Array of appointments with service and business info
+ */
+export async function getClientAppointments() {
+  const { data, error } = await supabase
+    .from('appointments')
+    .select(`
+      id,
+      scheduled_at,
+      status,
+      notes,
+      business_id,
+      services (
+        name,
+        duration_minutes,
+        price
+      ),
+      profiles!appointments_business_id_fkey (
+        id,
+        business_name,
+        business_type,
+        business_image_url
+      )
+    `)
+    .order('scheduled_at', { ascending: false })
+
+  if (error) throw error
+  return data || []
+}
+
+/**
+ * Cancel an appointment (client action)
+ * @param {string} appointmentId - Appointment ID
+ * @returns {Promise<Object>} Updated appointment
+ */
+export async function cancelAppointment(appointmentId) {
+  const { data, error } = await supabase
+    .from('appointments')
+    .update({ status: 'cancelled' })
+    .eq('id', appointmentId)
+    .select()
+    .single()
+
+  if (error) throw error
+  return data
+}
+
+// ─────────────────────────────────────────────
+// FAVORITES (stored in DB, not localStorage)
+// ─────────────────────────────────────────────
+
+/**
+ * Get all favorites for the current logged-in client (with business details)
+ * @returns {Promise<Array>}
+ */
+export async function getFavorites() {
+  const { data, error } = await supabase
+    .from('favorites')
+    .select(`
+      id,
+      business_profile_id,
+      created_at,
+      profiles!favorites_business_profile_id_fkey (
+        id,
+        business_name,
+        business_type,
+        business_image_url
+      )
+    `)
+    .order('created_at', { ascending: false })
+
+  if (error) throw error
+  return data || []
+}
+
+/**
+ * Add a business to client favorites
+ * @param {string} clientProfileId - client's profiles.id
+ * @param {string} businessProfileId - business profiles.id
+ * @returns {Promise<Object>}
+ */
+export async function addFavorite(clientProfileId, businessProfileId) {
+  const { data, error } = await supabase
+    .from('favorites')
+    .insert([{ client_profile_id: clientProfileId, business_profile_id: businessProfileId }])
+    .select()
+    .single()
+
+  if (error && error.code === '23505') return null // already exists — silent
+  if (error) throw error
+  return data
+}
+
+/**
+ * Remove a business from client favorites
+ * @param {string} clientProfileId - client's profiles.id
+ * @param {string} businessProfileId - business profiles.id
+ * @returns {Promise<void>}
+ */
+export async function removeFavorite(clientProfileId, businessProfileId) {
+  const { error } = await supabase
+    .from('favorites')
+    .delete()
+    .eq('client_profile_id', clientProfileId)
+    .eq('business_profile_id', businessProfileId)
+
+  if (error) throw error
+}
+
+/**
+ * Check if a business is already favorited by the current client
+ * @param {string} clientProfileId
+ * @param {string} businessProfileId
+ * @returns {Promise<boolean>}
+ */
+export async function isFavorite(clientProfileId, businessProfileId) {
+  const { data, error } = await supabase
+    .from('favorites')
+    .select('id')
+    .eq('client_profile_id', clientProfileId)
+    .eq('business_profile_id', businessProfileId)
+    .maybeSingle()
+
+  if (error) throw error
+  return !!data
+}
+
+/**
+ * Get all publicly visible business profiles
+ * (for listing available businesses on the client dashboard)
+ * @returns {Promise<Array>}
+ */
+export async function getBusinessProfiles({ search = '', businessType = '', city = '' } = {}) {
+  let query = supabase
+    .from('profiles')
+    .select('id, business_name, business_type, business_description, business_image_url, email, phone, city')
+    .eq('account_type', 'business')
+    .order('business_name')
+
+  if (businessType) query = query.eq('business_type', businessType)
+  if (city)         query = query.eq('city', city)
+  if (search)       query = query.or(`business_name.ilike.%${search}%,business_description.ilike.%${search}%`)
+
+  const { data, error } = await query
+  if (error) throw error
+  return data || []
+}

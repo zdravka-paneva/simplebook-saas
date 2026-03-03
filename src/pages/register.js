@@ -1,4 +1,4 @@
-import { registerUser } from '../modules/auth.js'
+import { registerUser, loginUser } from '../modules/auth.js'
 
 const form = document.getElementById('registerForm')
 const errorAlert = document.getElementById('errorAlert')
@@ -175,22 +175,17 @@ form.addEventListener('submit', async (e) => {
 
     // Register user
     console.log('Стартиране на регистрация с:', { email, accountType: metadata.account_type })
-    const result = await registerUser(email, password, metadata)
-    console.log('Регистрация успешна:', result)
+    await registerUser(email, password, metadata)
+    console.log('Регистрация успешна, автоматичен логин...')
 
-    // Hide form
-    form.style.display = 'none'
+    // Auto-login after registration
+    const loginResult = await loginUser(email, password)
+    console.log('Автоматичен логин успешен:', loginResult)
 
-    // Show success message
-    successAlert.style.display = 'block'
-    
-    // Auto-redirect to login after 3 seconds
-    setTimeout(() => {
-      console.log('Редирект към login.html')
-      window.location.href = 'login.html'
-    }, 3000)
-
-    console.log('Регистрацията успешна. Редирект към login...')
+    // Redirect based on account type
+    const redirectUrl = accountType === 'business' ? 'dashboard.html' : 'my-bookings.html'
+    console.log('Редирект към:', redirectUrl)
+    window.location.href = redirectUrl
 
   } catch (error) {
     // Log full error details

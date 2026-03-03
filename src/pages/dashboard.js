@@ -316,9 +316,10 @@ function loadBusinessProfileForm() {
   if (!currentProfile) return
   document.getElementById('bpBusinessName').value = currentProfile.business_name || ''
   document.getElementById('bpBusinessType').value = currentProfile.business_type || ''
-  document.getElementById('bpAddress').value = currentProfile.address || ''
-  document.getElementById('bpPhone').value = currentProfile.phone || ''
-  document.getElementById('bpDescription').value = currentProfile.business_description || ''
+  document.getElementById('bpCity').value         = currentProfile.city || ''
+  document.getElementById('bpAddress').value      = currentProfile.address || ''
+  document.getElementById('bpPhone').value        = currentProfile.phone || ''
+  document.getElementById('bpDescription').value  = currentProfile.business_description || ''
 
   // Show business photo if exists
   const preview = document.getElementById('businessPhotoPreview')
@@ -354,8 +355,9 @@ if (businessProfileForm) {
       const updates = {
         business_name: document.getElementById('bpBusinessName').value.trim(),
         business_type: document.getElementById('bpBusinessType').value,
-        address: document.getElementById('bpAddress').value.trim(),
-        phone: document.getElementById('bpPhone').value.trim(),
+        city:          document.getElementById('bpCity').value.trim(),
+        address:       document.getElementById('bpAddress').value.trim(),
+        phone:         document.getElementById('bpPhone').value.trim(),
         business_description: document.getElementById('bpDescription').value.trim()
       }
 

@@ -25,11 +25,18 @@
           <li class="nav-item">
             <a class="nav-link" href="#pricing">Pricing</a>
           </li>
-          <li class="nav-item">
+          <li class="nav-item" id="navLoginLink">
             <a class="nav-link" href="login.html">Login</a>
           </li>
-          <li class="nav-item">
+          <li class="nav-item" id="navSignupLink">
             <a class="btn btn-primary text-white ms-2" href="register.html">Sign Up</a>
+          </li>
+          <!-- Shown when logged in -->
+          <li class="nav-item d-none" id="navDashboardLink">
+            <a class="nav-link fw-medium" href="dashboard.html" id="navDashboardAnchor">Dashboard</a>
+          </li>
+          <li class="nav-item d-none" id="navLogoutLink">
+            <a class="nav-link text-danger" href="#" id="navLogoutBtn">Logout</a>
           </li>
         </ul>
       </div>

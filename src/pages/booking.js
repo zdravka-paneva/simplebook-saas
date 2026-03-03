@@ -1,4 +1,5 @@
-import { supabase, getProfileById } from '../services/supabase.js'
+import { supabase, getProfileById, getProfile, addFavorite, isFavorite } from '../services/supabase.js'
+import { getCurrentUser, logoutUser } from '../modules/auth.js'
 
 const bookingForm = document.getElementById('bookingForm')
 const appointmentDateInput = document.getElementById('appointmentDate')
@@ -208,6 +209,17 @@ bookingForm.addEventListener('submit', async (e) => {
 
     // Create client record
     const businessId = getBusinessIdFromUrl() || currentBusinessId
+    const loggedUser = await getCurrentUser()
+
+    // Get the client's profile.id (needed for RLS to link appointments to client)
+    let clientProfileId = null
+    if (loggedUser) {
+      try {
+        const profile = await getProfile(loggedUser.id)
+        clientProfileId = profile?.id || null
+      } catch { /* not logged in or profile missing — booking still works without link */ }
+    }
+
     const { data: clientData, error: clientError } = await supabase
       .from('clients')
       .insert([{
@@ -215,7 +227,9 @@ bookingForm.addEventListener('submit', async (e) => {
         email: clientEmail,
         full_name: clientName,
         phone: clientPhone,
-        notes: clientNotes
+        notes: clientNotes,
+        // Link to profile so client can see their appointments in the client dashboard
+        profile_id: clientProfileId
       }])
       .select()
       .single()
@@ -252,6 +266,37 @@ bookingForm.addEventListener('submit', async (e) => {
     bookingForm.style.display = 'none'
     successMessage.style.display = 'block'
     window.scrollTo(0, 0)
+
+    // Save as favorite button (DB-backed)
+    const favBtn = document.getElementById('saveAsFavoriteBtn')
+    if (favBtn && currentBusinessId) {
+      const loggedUserForFav = await getCurrentUser()
+      if (!loggedUserForFav) {
+        // Not logged in — hide the fav button
+        favBtn.style.display = 'none'
+      } else {
+        // Check if already favorited
+        const clientProf = await getProfile(loggedUserForFav.id)
+        if (clientProf) {
+          const already = await isFavorite(clientProf.id, currentBusinessId)
+          if (already) {
+            favBtn.textContent = '⭐ Already in Favorites'
+            favBtn.disabled = true
+          }
+          favBtn.addEventListener('click', async () => {
+            try {
+              await addFavorite(clientProf.id, currentBusinessId)
+              favBtn.textContent = '⭐ Saved to Favorites!'
+              favBtn.disabled = true
+              favBtn.classList.remove('btn-outline-warning')
+              favBtn.classList.add('btn-warning')
+            } catch (err) {
+              console.error('Save favorite failed:', err)
+            }
+          })
+        }
+      }
+    }
   } catch (error) {
     console.error('Booking failed:', error)
     errorMessage.textContent = error.message || 'Failed to create appointment'
@@ -270,10 +315,50 @@ bookingForm.addEventListener('submit', async (e) => {
 async function initPage() {
   const businessId = getBusinessIdFromUrl()
 
+  // Check if client is logged in - show their name and logout button
+  try {
+    const user = await getCurrentUser()
+    if (user) {
+      const greeting = document.getElementById('clientGreeting')
+      const logoutBtn = document.getElementById('clientLogoutBtn')
+      if (greeting) {
+        greeting.textContent = `👋 ${user.user_metadata?.full_name || user.email}`
+        greeting.style.display = 'inline'
+      }
+      if (logoutBtn) logoutBtn.style.display = 'inline-block'
+
+      // Pre-fill client details in the form
+      const nameField = document.getElementById('clientName')
+      const emailField = document.getElementById('clientEmail')
+      const phoneField = document.getElementById('clientPhone')
+      if (nameField && user.user_metadata?.full_name) nameField.value = user.user_metadata.full_name
+      if (emailField) emailField.value = user.email
+      if (phoneField && user.user_metadata?.phone) phoneField.value = user.user_metadata.phone
+    }
+  } catch (e) {
+    // not logged in - that's fine, booking page is public
+  }
+
+  // Logout button
+  const logoutBtn = document.getElementById('clientLogoutBtn')
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async () => {
+      await logoutUser()
+      window.location.href = 'login.html'
+    })
+  }
+
   if (!businessId) {
-    // No business ID - show generic placeholder
-    initDateInput()
-    await loadServices()
+    // If logged in as client → redirect to client dashboard
+    const user = await getCurrentUser()
+    if (user && user.user_metadata?.account_type === 'client') {
+      window.location.href = 'my-bookings.html'
+      return
+    }
+    // If not logged in → show info panel
+    document.getElementById('noBusiness').style.display = 'block'
+    const bc = document.getElementById('bookingContainer')
+    if (bc) bc.style.display = 'none'
     return
   }
 
@@ -283,18 +368,14 @@ async function initPage() {
   try {
     const profile = await getProfileById(businessId)
     if (profile) {
-      // Business name & type
       document.getElementById('businessName').textContent = profile.business_name || 'Our Business'
       document.getElementById('businessType').textContent = profile.business_type || ''
       document.getElementById('businessDescription').textContent =
         profile.business_description || 'Welcome! Book your appointment below.'
-
-      // Contact info
       document.getElementById('businessEmail').textContent = profile.email || '—'
       document.getElementById('businessPhone').textContent = profile.phone || '—'
       document.getElementById('businessAddress').textContent = profile.address || '—'
 
-      // Business photo
       if (profile.business_image_url) {
         const photoContainer = document.getElementById('businessPhotoContainer')
         if (photoContainer) {
@@ -302,7 +383,6 @@ async function initPage() {
         }
       }
 
-      // Page title
       document.title = `Book at ${profile.business_name} - SimpleBook`
     } else {
       document.getElementById('businessName').textContent = 'Business not found'

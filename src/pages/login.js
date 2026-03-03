@@ -42,7 +42,7 @@ form.addEventListener('submit', async (e) => {
     successAlert.style.display = 'block'
 
     setTimeout(() => {
-      const url = accountType === 'business' ? 'dashboard.html' : 'booking.html'
+      const url = accountType === 'business' ? 'dashboard.html' : 'my-bookings.html'
       window.location.href = url
     }, 500)
 

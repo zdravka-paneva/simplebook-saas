@@ -14,14 +14,33 @@
       <a class="navbar-brand fw-bold" href="index.html">
         <span style="color: #0066cc;">Simple</span><span style="color: #f39c12;">Book</span>
       </a>
-      <div class="ms-auto">
-        <a href="index.html" class="btn btn-outline-primary btn-sm">← Back to Home</a>
+      <div class="ms-auto d-flex gap-2">
+        <span id="clientGreeting" class="text-muted small align-self-center" style="display:none;"></span>
+        <button id="clientLogoutBtn" class="btn btn-outline-secondary btn-sm" style="display:none;">Logout</button>
+        <a href="index.html" class="btn btn-outline-primary btn-sm" id="backHomeBtn">&#8592; Back to Home</a>
       </div>
     </div>
   </nav>
 
+  <!-- No Business Selected Message (shown when no ?business= in URL) -->
+  <div id="noBusiness" class="container py-5" style="display:none;">
+    <div class="row justify-content-center">
+      <div class="col-md-6 text-center">
+        <div style="font-size:4rem;">📅</div>
+        <h2 class="fw-bold mt-3 mb-2">Find your next appointment</h2>
+        <p class="text-muted mb-4">Discover registered businesses on SimpleBook and book directly — no link needed.</p>
+        <a href="my-bookings.html#discover" class="btn btn-primary btn-lg fw-bold me-2">🔍 Browse Businesses</a>
+        <a href="my-bookings.html" class="btn btn-outline-secondary btn-lg">My Bookings</a>
+        <div class="card border-0 shadow-sm p-4 text-start mt-4">
+          <h6 class="fw-bold mb-2">Have a booking link?</h6>
+          <p class="text-muted small mb-0">If a business shared a direct booking URL with you, just open that link and it will load their page automatically.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Main Booking Section -->
-  <div class="container py-5">
+  <div id="bookingContainer" class="container py-5">
     <div class="row">
       <!-- Left Column - Business Info -->
       <div class="col-lg-5 mb-4 mb-lg-0">
@@ -172,9 +191,8 @@
               </div>
 
               <!-- Error Alert -->
-              <div id="errorAlert" class="alert alert-danger alert-dismissible fade" role="alert" style="display: none;">
-                <strong>Error!</strong> <span id="errorMessage"></span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              <div id="errorAlert" class="alert alert-danger" role="alert" style="display: none;">
+                <span id="errorMessage"></span>
               </div>
 
               <!-- Submit Button -->
@@ -184,8 +202,15 @@
               </button>
 
               <!-- Success Message -->
-              <div id="successMessage" class="alert alert-success mt-3" style="display: none;">
-                <strong>Thank you!</strong> Your appointment has been booked successfully. Check your email for confirmation.
+              <div id="successMessage" class="mt-3" style="display: none;">
+                <div class="alert alert-success">
+                  <h5 class="fw-bold mb-2">🎉 Booking Confirmed!</h5>
+                  <p class="mb-3">Your appointment has been booked successfully.</p>
+                  <div class="d-flex flex-wrap gap-2">
+                    <a href="my-bookings.html" class="btn btn-success btn-sm fw-medium">📋 View My Bookings</a>
+                    <button id="saveAsFavoriteBtn" class="btn btn-outline-warning btn-sm fw-medium">⭐ Save Business as Favorite</button>
+                  </div>
+                </div>
               </div>
             </form>
 
