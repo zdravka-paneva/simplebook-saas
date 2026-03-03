@@ -11,6 +11,8 @@ const businessProfileTab = document.getElementById('businessProfileTab')
 
 let currentUser = null
 let currentProfile = null
+let allAppointmentsData = []  // full list cached for filter tabs
+let currentApptFilter = 'pending' // default to pending
 
 // SIMPLE: Just check auth and load data - NO LISTENERS
 async function checkAuth() {
@@ -107,18 +109,45 @@ async function loadDashboardData() {
 
     // Get appointments
     const appointments = await getAppointmentsWithDetails(currentProfile.id)
-    document.getElementById('totalAppointments').textContent = appointments?.length || 0
+    allAppointmentsData = appointments || []
+    document.getElementById('totalAppointments').textContent = allAppointmentsData.length
 
     // Count this month's appointments
     const now = new Date()
-    const thisMonthAppts = appointments?.filter(appt => {
+    const thisMonthAppts = allAppointmentsData.filter(appt => {
       const apptDate = new Date(appt.scheduled_at)
       return apptDate.getMonth() === now.getMonth() && apptDate.getFullYear() === now.getFullYear()
-    }) || []
+    })
     document.getElementById('thisMonthAppointments').textContent = thisMonthAppts.length
 
-    // Populate recent appointments
-    populateAppointments(appointments?.slice(0, 5) || [])
+    // Pending count & banner
+    const pendingAppts = allAppointmentsData.filter(a => a.status === 'pending')
+    const banner = document.getElementById('pendingRequestsBanner')
+    const pendingBadge = document.getElementById('pendingCountBadge')
+    const apptAlert = document.getElementById('apptPendingAlert')
+    const apptPendingCount = document.getElementById('apptPendingCount')
+    if (banner && pendingBadge) {
+      if (pendingAppts.length > 0) {
+        pendingBadge.textContent = pendingAppts.length
+        banner.classList.remove('d-none')
+      } else {
+        banner.classList.add('d-none')
+      }
+    }
+    if (apptAlert && apptPendingCount) {
+      if (pendingAppts.length > 0) {
+        apptPendingCount.textContent = pendingAppts.length
+        apptAlert.classList.remove('d-none')
+      } else {
+        apptAlert.classList.add('d-none')
+      }
+    }
+
+    // Populate recent appointments (overview)
+    populateAppointments(allAppointmentsData.slice(0, 5))
+
+    // Populate full appointments tab
+    populateAppointmentsTab()
 
     // Populate service dropdown in appointment modal
     const serviceSelect = document.getElementById('apptService')
@@ -143,13 +172,13 @@ async function loadDashboardData() {
   }
 }
 
-// Populate appointments table
+// Populate appointments table (overview - last 5)
 function populateAppointments(appointments) {
   const tableBody = document.getElementById('appointmentsTableBody')
   if (!tableBody) return
 
   if (appointments.length === 0) {
-    tableBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">No appointments yet.</td></tr>'
+    tableBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">No appointments yet. Create one or wait for client bookings.</td></tr>'
     return
   }
 
@@ -157,20 +186,178 @@ function populateAppointments(appointments) {
     const apptDate = new Date(appt.scheduled_at)
     const dateStr = apptDate.toLocaleDateString()
     const timeStr = apptDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    const statusBadge = `<span class="badge bg-${appt.status === 'confirmed' ? 'success' : appt.status === 'pending' ? 'warning' : appt.status === 'completed' ? 'info' : 'danger'}">${appt.status}</span>`
-    
+    const statusBadge = `<span class="badge bg-${appt.status === 'confirmed' ? 'success' : appt.status === 'pending' ? 'warning text-dark' : appt.status === 'completed' ? 'info' : 'danger'}">${appt.status}</span>`
+
+    let actionBtn = ''
+    if (appt.status === 'pending') {
+      actionBtn = `<button class="btn btn-sm btn-success" onclick="confirmAppointment('${appt.id}')">Confirm</button>`
+    }
+
     return `
       <tr>
         <td>${appt.clients?.full_name || 'Unknown'}</td>
         <td>${appt.services?.name || 'Unknown'}</td>
         <td>${dateStr} ${timeStr}</td>
         <td>${statusBadge}</td>
-        <td>
-          <button class="btn btn-sm btn-outline-primary" onclick="editAppointment('${appt.id}')">Edit</button>
-        </td>
+        <td>${actionBtn}</td>
       </tr>
     `
   }).join('')
+}
+
+// ─── Full Appointments Tab ────────────────────────────────────────────────────
+
+function populateAppointmentsTab() {
+  const tbody = document.getElementById('allAppointmentsTableBody')
+  if (!tbody) return
+
+  let filtered = allAppointmentsData
+  if (currentApptFilter !== 'all') {
+    filtered = allAppointmentsData.filter(a => a.status === currentApptFilter)
+  }
+
+  if (filtered.length === 0) {
+    const labels = { pending: 'pending', confirmed: 'confirmed', completed: 'completed', cancelled: 'cancelled', all: '' }
+    const label = currentApptFilter !== 'all' ? `No ${labels[currentApptFilter]} appointments.` : 'No appointments yet.'
+    tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-4">${label}</td></tr>`
+    return
+  }
+
+  tbody.innerHTML = filtered.map(appt => {
+    const apptDate = new Date(appt.scheduled_at)
+    const dateStr = apptDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+    const timeStr = apptDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+
+    const statusColors = { confirmed: 'success', pending: 'warning', completed: 'info', cancelled: 'danger' }
+    const statusBadge = `<span class="badge bg-${statusColors[appt.status] || 'secondary'}${appt.status === 'pending' ? ' text-dark' : ''}">${appt.status}</span>`
+
+    let actions = ''
+    if (appt.status === 'pending') {
+      actions = `
+        <button class="btn btn-success btn-sm me-1" onclick="confirmAppointment('${appt.id}')">✅ Confirm</button>
+        <button class="btn btn-outline-danger btn-sm" onclick="cancelDashboardAppointment('${appt.id}')">✖ Cancel</button>
+      `
+    } else if (appt.status === 'confirmed') {
+      actions = `
+        <button class="btn btn-info btn-sm me-1 text-white" onclick="completeAppointment('${appt.id}')">✔ Complete</button>
+        <button class="btn btn-outline-danger btn-sm" onclick="cancelDashboardAppointment('${appt.id}')">✖ Cancel</button>
+      `
+    } else {
+      actions = '<span class="text-muted small">—</span>'
+    }
+
+    return `
+      <tr>
+        <td>
+          <div class="fw-medium">${appt.clients?.full_name || 'Unknown'}</div>
+          <div class="text-muted small">${appt.clients?.email || ''}</div>
+        </td>
+        <td>
+          <div>${appt.services?.name || 'Unknown'}</div>
+          <div class="text-muted small">${appt.services?.duration_minutes || 0} min · $${appt.services?.price || 0}</div>
+        </td>
+        <td>
+          <div>${dateStr}</div>
+          <div class="text-muted small">${timeStr}</div>
+        </td>
+        <td><span class="text-muted small">${appt.notes || '—'}</span></td>
+        <td>${statusBadge}</td>
+        <td class="text-nowrap">${actions}</td>
+      </tr>
+    `
+  }).join('')
+}
+
+// ─── Appointment Actions (called from inline HTML onclick) ────────────────────
+
+window.confirmAppointment = async function(id) {
+  try {
+    await updateAppointmentStatus(id, 'confirmed')
+    await loadDashboardData()
+    showDashboardToast('Appointment confirmed! The client will be notified.', 'success')
+  } catch (err) {
+    console.error('Confirm failed:', err)
+    showDashboardToast('Failed to confirm: ' + err.message, 'danger')
+  }
+}
+
+window.cancelDashboardAppointment = async function(id) {
+  if (!confirm('Cancel this appointment?')) return
+  try {
+    await updateAppointmentStatus(id, 'cancelled')
+    await loadDashboardData()
+    showDashboardToast('Appointment cancelled.', 'warning')
+  } catch (err) {
+    console.error('Cancel failed:', err)
+    showDashboardToast('Failed to cancel: ' + err.message, 'danger')
+  }
+}
+
+window.completeAppointment = async function(id) {
+  try {
+    await updateAppointmentStatus(id, 'completed')
+    await loadDashboardData()
+    showDashboardToast('Appointment marked as completed!', 'success')
+  } catch (err) {
+    console.error('Complete failed:', err)
+    showDashboardToast('Failed to update: ' + err.message, 'danger')
+  }
+}
+
+window.editAppointment = function() {
+  // Jump to appointments tab showing all appointments
+  showSection('appointmentsSection')
+  document.querySelectorAll('.list-group-item').forEach(t => t.classList.remove('active'))
+  appointmentsTab.classList.add('active')
+  currentApptFilter = 'all'
+  syncFilterButtons()
+  populateAppointmentsTab()
+}
+
+// Navigate to appointments tab and show pending filter
+window.reviewPendingAppointments = function() {
+  showSection('appointmentsSection')
+  appointmentsTab.classList.add('active')
+  document.querySelectorAll('.list-group-item').forEach(t => t.classList.remove('active'))
+  appointmentsTab.classList.add('active')
+  // Activate pending filter
+  currentApptFilter = 'pending'
+  syncFilterButtons()
+  populateAppointmentsTab()
+}
+
+// ─── Toast helper for dashboard ───────────────────────────────────────────────
+
+function showDashboardToast(message, type = 'success') {
+  // Try existing toast element, or use alert fallback
+  const toastEl = document.getElementById('dashboardToast')
+  if (toastEl) {
+    const toastBody = document.getElementById('dashboardToastBody')
+    const colors = { success: 'bg-success', danger: 'bg-danger', warning: 'bg-warning text-dark', info: 'bg-info' }
+    toastEl.className = `toast align-items-center text-white border-0 ${colors[type] || 'bg-success'}`
+    if (type === 'warning') toastEl.classList.remove('text-white')
+    if (toastBody) toastBody.textContent = message
+    const bsToast = new bootstrap.Toast(toastEl, { delay: 4000 })
+    bsToast.show()
+  } else {
+    // Fallback: brief banner
+    const banner = document.createElement('div')
+    const colors = { success: '#d1e7dd', danger: '#f8d7da', warning: '#fff3cd', info: '#cff4fc' }
+    banner.style.cssText = `position:fixed;top:16px;right:16px;z-index:9999;padding:12px 20px;border-radius:8px;background:${colors[type]||colors.success};box-shadow:0 4px 12px rgba(0,0,0,.15);font-weight:500;max-width:350px;`
+    banner.textContent = message
+    document.body.appendChild(banner)
+    setTimeout(() => banner.remove(), 4000)
+  }
+}
+
+// Sync filter button visual state
+function syncFilterButtons() {
+  const outlineCls = { pending: 'btn-outline-warning', confirmed: 'btn-outline-success', all: 'btn-outline-secondary', completed: 'btn-outline-info', cancelled: 'btn-outline-danger' }
+  const activeCls  = { pending: 'btn-warning',         confirmed: 'btn-success',         all: 'btn-secondary',         completed: 'btn-info',         cancelled: 'btn-danger' }
+  document.querySelectorAll('.appt-filter-btn').forEach(btn => {
+    const f = btn.dataset.filter
+    btn.className = `btn btn-sm appt-filter-btn ${f === currentApptFilter ? activeCls[f] + ' fw-medium' : outlineCls[f]}`
+  })
 }
 
 // Populate services list
@@ -250,7 +437,18 @@ overviewTab.addEventListener('click', (e) => {
 appointmentsTab.addEventListener('click', (e) => {
   e.preventDefault()
   showSection('appointmentsSection')
+  document.querySelectorAll('.list-group-item').forEach(t => t.classList.remove('active'))
   appointmentsTab.classList.add('active')
+  populateAppointmentsTab()
+})
+
+// Filter buttons inside the appointments section (delegated to document)
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.appt-filter-btn')
+  if (!btn) return
+  currentApptFilter = btn.dataset.filter
+  syncFilterButtons()
+  populateAppointmentsTab()
 })
 
 servicesTab.addEventListener('click', (e) => {

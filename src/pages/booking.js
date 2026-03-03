@@ -119,9 +119,12 @@ function generateTimeSlots() {
 
 // Initialize date input
 function initDateInput() {
-  const today = new Date().toISOString().split('T')[0]
-  appointmentDateInput.min = today
-  appointmentDateInput.value = today
+  const today = new Date()
+  const localDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+  appointmentDateInput.min = localDate
+  appointmentDateInput.value = localDate
+  // Populate slots immediately for the pre-selected date
+  populateTimeSlots()
 }
 
 // Handle date change
@@ -140,17 +143,41 @@ appointmentDateInput.addEventListener('change', (e) => {
   populateTimeSlots()
 })
 
-// Populate time slots
+// Populate time slots — skips past slots when the selected date is today
 function populateTimeSlots() {
   const slots = generateTimeSlots()
   appointmentTimeSelect.innerHTML = '<option value="">Select a time</option>'
 
+  const selectedDate = appointmentDateInput.value
+  const now = new Date()
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+  const isToday = selectedDate === todayStr
+  // Add 30-min buffer so the current slot isn't selectable if it started just now
+  const cutoffMinutes = isToday ? now.getHours() * 60 + now.getMinutes() + 30 : 0
+
+  let hasSlots = false
   slots.forEach(slot => {
+    // Parse slot back to minutes-from-midnight
+    const m = slot.match(/(\d+):(\d+)\s(AM|PM)/)
+    if (!m) return
+    let h = parseInt(m[1])
+    const min = parseInt(m[2])
+    if (m[3] === 'PM' && h !== 12) h += 12
+    if (m[3] === 'AM' && h === 12) h = 0
+    const slotMinutes = h * 60 + min
+
+    if (isToday && slotMinutes < cutoffMinutes) return // skip past slots
+
     const option = document.createElement('option')
     option.value = slot
     option.textContent = slot
     appointmentTimeSelect.appendChild(option)
+    hasSlots = true
   })
+
+  if (!hasSlots) {
+    appointmentTimeSelect.innerHTML = '<option value="">No available slots for today — please pick another date</option>'
+  }
 }
 
 // Update booking summary when time is selected
@@ -220,17 +247,20 @@ bookingForm.addEventListener('submit', async (e) => {
       } catch { /* not logged in or profile missing — booking still works without link */ }
     }
 
+    // Upsert: if client already booked with this business, reuse their record
     const { data: clientData, error: clientError } = await supabase
       .from('clients')
-      .insert([{
+      .upsert([{
         business_id: businessId,
         email: clientEmail,
         full_name: clientName,
         phone: clientPhone,
-        notes: clientNotes,
-        // Link to profile so client can see their appointments in the client dashboard
-        profile_id: clientProfileId
-      }])
+        notes: clientNotes || undefined,
+        profile_id: clientProfileId || undefined
+      }], {
+        onConflict: 'business_id,email',
+        ignoreDuplicates: false   // update name/phone if they changed
+      })
       .select()
       .single()
 

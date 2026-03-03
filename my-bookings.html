@@ -45,6 +45,17 @@
       </a>
       <div class="ms-auto d-flex align-items-center gap-3">
         <span id="clientGreeting" class="text-muted small fw-medium"></span>
+
+        <!-- Notification Bell -->
+        <div class="position-relative">
+          <button id="notifBell" class="btn btn-outline-secondary btn-sm position-relative" title="Notifications"
+            style="width:38px;height:38px;padding:0;display:flex;align-items:center;justify-content:center;font-size:1.1rem;">
+            🔔
+            <span id="notifBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none"
+              style="font-size:.6rem;">0</span>
+          </button>
+        </div>
+
         <a href="index.html" class="btn btn-outline-secondary btn-sm">🏠 Home</a>
         <button id="logoutBtn" class="btn btn-outline-danger btn-sm">Logout</button>
       </div>
@@ -225,6 +236,37 @@
       </div>
     </div>
   </div>
+
+  <!-- Notification Drawer -->
+  <div id="notifDrawer" style="
+    display:none;
+    position:fixed;
+    top:0;right:0;bottom:0;
+    width:360px;
+    max-width:100vw;
+    background:#fff;
+    z-index:2000;
+    box-shadow:-4px 0 24px rgba(0,0,0,.15);
+    flex-direction:column;
+    transform:translateX(100%);
+    transition:transform .25s ease;
+  ">
+    <div class="d-flex align-items-center justify-content-between px-4 py-3 border-bottom">
+      <h6 class="fw-bold mb-0">🔔 Notifications</h6>
+      <div class="d-flex gap-2">
+        <button id="markAllReadBtn" class="btn btn-sm btn-outline-secondary" style="font-size:.75rem;">Mark all read</button>
+        <button id="closeNotifDrawer" class="btn-close"></button>
+      </div>
+    </div>
+    <div id="notifList" class="flex-grow-1 overflow-auto p-3">
+      <div id="notifEmpty" class="text-center text-muted py-5">
+        <div style="font-size:2.5rem;">🔕</div>
+        <div class="mt-2 small">No notifications yet</div>
+      </div>
+    </div>
+  </div>
+  <!-- Drawer backdrop -->
+  <div id="notifBackdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:1999;"></div>
 
   <!-- Toast notification -->
   <div class="position-fixed bottom-0 end-0 p-3" style="z-index:1100">

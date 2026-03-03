@@ -6,7 +6,8 @@ import {
   addFavorite,
   removeFavorite,
   getProfile,
-  getBusinessProfiles
+  getBusinessProfiles,
+  supabase
 } from '../services/supabase.js'
 
 let allAppointments   = []
@@ -19,6 +20,120 @@ let currentProfile    = null  // logged-in client's profiles row
 let allBusinesses     = []   // cached full list from DB
 let discoverLoaded    = false
 let discoverTimer     = null // debounce handle
+
+// ──────────────────────────────────────────────
+// Notification helpers (persisted in localStorage)
+// ──────────────────────────────────────────────
+const NOTIF_KEY = 'sb_notifications'
+
+function loadNotifications() {
+  try { return JSON.parse(localStorage.getItem(NOTIF_KEY)) || [] }
+  catch { return [] }
+}
+
+function saveNotifications(list) {
+  localStorage.setItem(NOTIF_KEY, JSON.stringify(list))
+}
+
+function pushNotification({ icon, title, body, apptId }) {
+  const list = loadNotifications()
+  list.unshift({ id: Date.now(), icon, title, body, apptId, read: false, at: new Date().toISOString() })
+  // Keep max 30
+  saveNotifications(list.slice(0, 30))
+  renderNotifDrawer()
+  updateNotifBadge()
+}
+
+function markAllRead() {
+  const list = loadNotifications().map(n => ({ ...n, read: true }))
+  saveNotifications(list)
+  renderNotifDrawer()
+  updateNotifBadge()
+}
+
+function dismissNotification(id) {
+  const list = loadNotifications().filter(n => n.id !== id)
+  saveNotifications(list)
+  renderNotifDrawer()
+  updateNotifBadge()
+}
+
+function updateNotifBadge() {
+  const unread = loadNotifications().filter(n => !n.read).length
+  const badge = document.getElementById('notifBadge')
+  if (!badge) return
+  if (unread > 0) {
+    badge.textContent = unread > 9 ? '9+' : unread
+    badge.classList.remove('d-none')
+  } else {
+    badge.classList.add('d-none')
+  }
+}
+
+function renderNotifDrawer() {
+  const list = loadNotifications()
+  const container = document.getElementById('notifList')
+  const empty = document.getElementById('notifEmpty')
+  if (!container) return
+
+  if (list.length === 0) {
+    empty.style.display = 'block'
+    // Remove any existing cards
+    container.querySelectorAll('.notif-item').forEach(el => el.remove())
+    return
+  }
+  empty.style.display = 'none'
+
+  // Re-render all items
+  container.querySelectorAll('.notif-item').forEach(el => el.remove())
+  list.forEach(n => {
+    const div = document.createElement('div')
+    div.className = `notif-item card border-0 mb-2 shadow-sm ${n.read ? 'opacity-75' : ''}`
+    div.style.cssText = `border-left: 4px solid ${n.read ? '#dee2e6' : '#0066cc'} !important; border-radius:10px;`
+    div.innerHTML = `
+      <div class="card-body py-2 px-3">
+        <div class="d-flex justify-content-between align-items-start gap-2">
+          <div class="d-flex gap-2 align-items-start">
+            <span style="font-size:1.3rem;line-height:1.4;">${n.icon}</span>
+            <div>
+              <div class="fw-semibold small">${n.title}</div>
+              <div class="text-muted" style="font-size:.8rem;">${n.body}</div>
+              <div class="text-muted mt-1" style="font-size:.7rem;">${new Date(n.at).toLocaleString()}</div>
+            </div>
+          </div>
+          <button class="btn-close flex-shrink-0" style="font-size:.65rem;" data-notif-id="${n.id}" title="Dismiss"></button>
+        </div>
+      </div>`
+    div.querySelector('.btn-close').addEventListener('click', () => dismissNotification(n.id))
+    container.appendChild(div)
+  })
+}
+
+function openNotifDrawer() {
+  const drawer = document.getElementById('notifDrawer')
+  const backdrop = document.getElementById('notifBackdrop')
+  drawer.style.display = 'flex'
+  backdrop.style.display = 'block'
+  // Trigger animation next frame
+  requestAnimationFrame(() => { drawer.style.transform = 'translateX(0)' })
+  // Mark all as read after 1 second
+  setTimeout(() => { markAllRead() }, 1000)
+}
+
+function closeNotifDrawer() {
+  const drawer = document.getElementById('notifDrawer')
+  const backdrop = document.getElementById('notifBackdrop')
+  drawer.style.transform = 'translateX(100%)'
+  backdrop.style.display = 'none'
+  setTimeout(() => { drawer.style.display = 'none' }, 260)
+}
+
+function wireNotifDrawer() {
+  document.getElementById('notifBell')?.addEventListener('click', openNotifDrawer)
+  document.getElementById('closeNotifDrawer')?.addEventListener('click', closeNotifDrawer)
+  document.getElementById('notifBackdrop')?.addEventListener('click', closeNotifDrawer)
+  document.getElementById('markAllReadBtn')?.addEventListener('click', () => { markAllRead(); updateNotifBadge() })
+}
 
 // ──────────────────────────────────────────────
 // Bootstrap instances (lazy initialized)
@@ -455,6 +570,11 @@ async function init() {
 
   // Wire discover controls once DOM is ready
   wireDiscoverControls()
+  wireNotifDrawer()
+
+  // Load persisted notifications on page start
+  renderNotifDrawer()
+  updateNotifBadge()
 
   // Deep-link via URL hash (e.g. my-bookings.html#discover)
   const hash = window.location.hash.replace('#', '')
@@ -475,6 +595,59 @@ async function init() {
     document.getElementById('appointmentsLoading').innerHTML =
       `<div class="alert alert-danger">Failed to load appointments. Please <a href="">refresh the page</a>.</div>`
   }
+
+  // ─── Realtime: listen for appointment status changes ─────────────────────────
+  supabase
+    .channel('client-appt-status')
+    .on(
+      'postgres_changes',
+      { event: 'UPDATE', schema: 'public', table: 'appointments' },
+      (payload) => {
+        const updated = payload.new
+        const idx = allAppointments.findIndex(a => a.id === updated.id)
+        if (idx === -1) return // not this client's appointment
+
+        const oldStatus = allAppointments[idx].status
+        if (oldStatus === updated.status) return
+
+        // Merge updated fields (keep joined relations from original)
+        allAppointments[idx] = { ...allAppointments[idx], ...updated }
+
+        // Show notification toast
+        const svcName = allAppointments[idx].services?.name || 'appointment'
+        const bizName = allAppointments[idx].profiles?.business_name || 'the business'
+        if (updated.status === 'confirmed') {
+          showToast(`✅ Your booking for "${svcName}" has been confirmed!`, 'success')
+          pushNotification({
+            icon: '✅',
+            title: 'Booking Confirmed!',
+            body: `Your appointment for "${svcName}" at ${bizName} has been confirmed.`,
+            apptId: updated.id
+          })
+        } else if (updated.status === 'cancelled') {
+          showToast(`❌ Your booking for "${svcName}" was cancelled by the business.`, 'danger')
+          pushNotification({
+            icon: '❌',
+            title: 'Booking Cancelled',
+            body: `Your appointment for "${svcName}" at ${bizName} was cancelled.`,
+            apptId: updated.id
+          })
+        } else if (updated.status === 'completed') {
+          showToast(`🎉 Your appointment for "${svcName}" is marked as completed!`, 'info')
+          pushNotification({
+            icon: '🎉',
+            title: 'Appointment Completed',
+            body: `Your appointment for "${svcName}" at ${bizName} is now completed. Thanks for visiting!`,
+            apptId: updated.id
+          })
+        }
+
+        // Re-render to reflect new status
+        updateStats()
+        renderAppointments()
+      }
+    )
+    .subscribe()
 }
 
 init()
