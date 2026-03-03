@@ -122,31 +122,72 @@ simplebook-saas/
 
 ### ER Diagram
 
-```
-┌─────────────────────┐
-│   auth.users (*)    │
-│  (From Supabase)    │
-└──────────┬──────────┘
-           │ user_id
-           │ (1:1)
-┌─────────────────────────────────┐
-│         profiles                 │
-│  (business owners & clients)     │
-└────┬──────────────┬──────────────┘
-     │ (1:N)  id    │ id
-     │              │
-┌────────────────────┐   ┌──────────────────────┐
-│    services        │   │      clients         │
-│  (offered by bus)  │   │  (contacts for bus)  │
-└───────┬────────────┘   └──────────┬───────────┘
-        │ service_id                 │ client_id
-        │ (N:1)                      │ (N:1)
-        └────────────┬───────────────┘
-                     │
-            ┌────────▼──────────┐
-            │   appointments     │
-            │  (reservations)    │
-            └────────────────────┘
+```mermaid
+erDiagram
+    auth_users {
+        uuid id PK
+        text email
+        timestamp created_at
+    }
+
+    profiles {
+        uuid id PK
+        uuid user_id FK
+        text account_type
+        text email
+        text full_name
+        text phone
+        text business_name
+        text business_type
+        text business_description
+        text profile_image_url
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    services {
+        uuid id PK
+        uuid business_id FK
+        text name
+        text description
+        int duration_minutes
+        decimal price
+        boolean is_active
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    clients {
+        uuid id PK
+        uuid business_id FK
+        uuid profile_id FK
+        text email
+        text full_name
+        text phone
+        text notes
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    appointments {
+        uuid id PK
+        uuid business_id FK
+        uuid service_id FK
+        uuid client_id FK
+        timestamp scheduled_at
+        text status
+        text notes
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    auth_users ||--|| profiles : "has profile"
+    profiles ||--o{ services : "offers"
+    profiles ||--o{ clients : "manages"
+    profiles ||--o{ appointments : "receives"
+    services ||--o{ appointments : "booked as"
+    clients ||--o{ appointments : "makes"
+    profiles ||--o{ clients : "linked profile"
 ```
 
 ## 🚀 Getting Started
